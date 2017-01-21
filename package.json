@@ -1,0 +1,26 @@
+{
+  "name": "vertical",
+  "version": "1.0.0",
+  "description": "levelDB distributed,BigTable model.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zy445566/vertical.git"
+  },
+  "keywords": [
+    "levelDB",
+    "bigtable",
+    "distributed",
+    "server",
+    "client"
+  ],
+  "author": "zy445566",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zy445566/vertical/issues"
+  },
+  "homepage": "https://github.com/zy445566/vertical#readme"
+}
