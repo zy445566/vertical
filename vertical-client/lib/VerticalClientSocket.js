@@ -28,7 +28,7 @@ class VerticalClientSocket
 		});
 	}
 
-	writeData(method,params,db=null,listener=null)
+	writeData(method,params,db=null,listener=null,stream=null)
 	{
 		var nano = process.hrtime();
 		var operid = method+nano[0]+nano[1];
@@ -40,6 +40,8 @@ class VerticalClientSocket
 				method:method,
 				params:params,
 				db:db,
+				stream:stream,
+				islistener:false,
 				})+',');
 				this.recData(operid,resolve,reject);
 			});
@@ -49,6 +51,8 @@ class VerticalClientSocket
 				method:method,
 				params:params,
 				db:db,
+				stream:stream,
+				islistener:true,
 			})+',');
 			this.recData(operid,listener,listener);
 		}
@@ -58,7 +62,8 @@ class VerticalClientSocket
 
 	recData(operid,succ,fail)
 	{
-		this.socket.on('data',(buffer)=>{
+		var listener = function (buffer)
+		{
 			var buf = buffer.slice(0,buffer.length-1);
 			var jsonStr = '['+buf.toString()+']';
 			var jsonArr = JSON.parse(jsonStr);
@@ -73,10 +78,14 @@ class VerticalClientSocket
 					} else {
 						fail(...recData.res);
 					}
-					
+					if (!recData.islistener)
+					{
+						this.socket.removeListener('data', this);
+					}
 				}
 			}
-		});		
+		};
+		this.socket.on('data',listener);
 	}
 
 	stopServerSocket(force=false)

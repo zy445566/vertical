@@ -1,5 +1,7 @@
 var VerticalClientDBBatch = require('./VerticalClientDBBatch');
-var VerticalClientStream = require('./VerticalClientStream');
+var VerticalClientReadStream = require('./VerticalClientReadStream');
+var VerticalClientKeyStream = require('./VerticalClientKeyStream');
+var VerticalClientValueStream = require('./VerticalClientValueStream');
 class VerticalClientDB
 {
 	constructor(socket,db)
@@ -54,7 +56,17 @@ class VerticalClientDB
 
 	createReadStream(options={})
 	{
-		return new VerticalClientStream(this.socket,this.db);
+		return new VerticalClientReadStream(this.socket,this.db,options);
+	}
+
+	createKeyStream(ptions={})
+	{
+		return new VerticalClientKeyStream(this.socket,this.db,options);
+	}
+
+	createValueStream(ptions={})
+	{
+		return new VerticalClientValueStream(this.socket,this.db,options);
 	}
 
 	approximateSize(start, end)

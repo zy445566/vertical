@@ -8,9 +8,10 @@ class VerticalServerRun
 		this.vsl = new VerticalServerLevel();
 		this.dbList = config.dbList;
 		this.eventList = config.eventList;
+		this.streamList = config.streamList;
 	}
 
-	runSeverLevel(operData)
+	runServerLevel(operData)
 	{
 		switch (operData.method) {
 			case 'level':
@@ -51,7 +52,7 @@ class VerticalServerRun
 		}
 	}
 
-	runSeverDB(operData)
+	runServerDB(operData)
 	{
 		switch (operData.method) {
 			case 'isOpen':
@@ -73,9 +74,38 @@ class VerticalServerRun
 					this.socket.writeData(operData.operid,0,[res]);
 				});
 			break;
-		}
-			
+		}	
 	}
+
+	runServerStream(operData)
+	{
+		if (!this.streamList.hasOwnProperty(operData.stream.streamId))
+		{
+			this.streamList[operData.stream.streamId] = this.genFunc(this.dbList[operData.db],operData.stream);
+		}
+		var stream = this.streamList[operData.stream.streamId];
+		switch (operData.method) {
+			case 'destroy':
+				var runFunc = this.genFunc(stream,operData);
+				if(runFunc == '[runFunc Error]'){return;}
+				delete this.streamList[operData.stream.streamId];
+				this.socket.writeData(operData.operid,0,[runFunc]);
+				return;
+			break;
+			case 'on':
+				var runEmit = this.genEmit(stream,operData);
+				if(runEmit == '[runEmit Error]'){return;}
+				break;
+			default:
+				var runFunc = this.genFunc(stream,operData);
+				if(runFunc == '[runFunc Error]'){return;}
+				this.socket.writeData(operData.operid,0,[runFunc]);
+				return;
+			break;
+		}
+	}
+
+
 
 	genEmit(obj,operData)
 	{
@@ -83,7 +113,7 @@ class VerticalServerRun
 			db:obj,
 			event:operData.params,
 			listener:(...res)=>{
-				this.socket.writeData(operData.operid,0,res);
+				this.socket.writeData(operData.operid,0,res,true);
 			}
 		};
 		try{
@@ -116,9 +146,15 @@ class VerticalServerRun
 	{
 		if (operData.db==null)
 		{
-			var myPromise = this.runSeverLevel(operData);
+			var myPromise = this.runServerLevel(operData);
 		} else {
-			var myPromise = this.runSeverDB(operData);
+			if (operData.stream ==null)
+			{
+				var myPromise = this.runServerDB(operData);
+			} else {
+				var myPromise = this.runServerStream(operData);
+			}
+			
 		}
 		if (Object.prototype.toString.call(myPromise)=='[object Promise]')
 		{

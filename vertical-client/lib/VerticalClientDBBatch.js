@@ -8,9 +8,11 @@ class VerticalClientDBBatch
 		this.length =0;
 	}
 
-	put(key,value)
+	put(key,value,options={})
 	{
-		this.ops.push({ type: 'put', key: key, value: value });
+		var baseData = { type: 'put', key: key, value: value };
+		var data = Object.assign(baseData,options);
+		this.ops.push(data);
 		this.length++;
 		return this;
 	}
@@ -23,9 +25,11 @@ class VerticalClientDBBatch
 
 
 
-	del(key)
+	del(key,options={})
 	{
-		this.ops.push({ type: 'del', key: key });
+		var baseData = { type: 'del', key: key };
+		var data = Object.assign(baseData,options);
+		this.ops.push(data);
 		this.length++;
 		return this;
 	}

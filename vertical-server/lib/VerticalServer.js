@@ -54,19 +54,22 @@ class VerticalServer
 				resolve(res);
 			});
 		});
-		
 	}
 
+	syncServer(host,port,auth,db)
+	{
+
+	}
 
 }
 
-var vs = new VerticalServer({host:'127.0.0.1',port:5234,timeout:3000});
-vs.startServer().then((res)=>{
-	console.log(res);
-	// vs.stopServer();
-})
-.catch((error)=>{
-	console.log(error);
-});
+// var vs = new VerticalServer({host:'127.0.0.1',port:5234,timeout:3000});
+// vs.startServer().then((res)=>{
+// 	console.log(res);
+// 	// vs.stopServer();
+// })
+// .catch((error)=>{
+// 	console.log(error);
+// });
 
-// module.exports = VerticalServer;
+module.exports = VerticalServer;

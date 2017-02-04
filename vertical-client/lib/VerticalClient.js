@@ -61,20 +61,13 @@ vc.startVerticalClient();
 vc.level('./mydb')
 .then((res)=>{
 	vcdb = res;
-	vcdb.on('batch',(ary)=>{	
-		console.log(ary);
-	});
-	vcdb.on('put',(key,value)=>{
-		console.log(key,value);
-	});
-	return vcdb.put('ab','ccc');
-	// vcdb.batch()
-	// .put('a','aaa')
-	// .del('ab')
-	// .write();
+	vcdb.createReadStream({'start':'a', 'end':'b'})
+	.on('data', function (data) {
+    console.log(data.key, '=', data.value)
+  	});
 })
 .then((res)=>{
-	return vcdb.get('a');
+	// return vcdb.get('a');
 })
 .then((res)=>{
 	console.log(res);

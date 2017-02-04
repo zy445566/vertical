@@ -80,6 +80,16 @@ class VerticalServerDB
 		return this.db.createReadStream(options);
 	}
 
+	createKeyStream(options={})
+	{
+		return this.db.createKeyStream(options);
+	}
+
+	createValueStream(options={})
+	{
+		return this.db.createValueStream(options);
+	}
+
 	approximateSize(start, end)
 	{
 		return new Promise((resolve,reject)=>{

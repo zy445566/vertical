@@ -1,4 +1,3 @@
-var net = require('net');
 var VerticalServerRun = require('./VerticalServerRun');
 class VerticalServerSocket
 {
@@ -8,6 +7,8 @@ class VerticalServerSocket
 		this.socket.setTimeout(config.timeout);
 		this.eventList = {};
 		config.eventList = this.eventList;
+		this.streamList = {};
+		config.streamList = this.streamList;
 		this.vsr = new VerticalServerRun(this,config);
 	}
 
@@ -44,17 +45,25 @@ class VerticalServerSocket
 				console.log('event:'+this.eventList[operId]['event']+',removeListener:'+operId);
 				delete this.eventList[operId];
 			}
+			var streamId;
+			for (streamId in this.streamList)
+			{
+				this.streamList[streamId].destroy();
+				console.log('streamId:'+streamId);
+				delete this.streamList[streamId];
+			}
 			console.log('close:'+had_error);
 		});
 
 	}
 
-	writeData(operid,err,res)
+	writeData(operid,err,res,islistener=false)
 	{
 		var resData = {};
 		resData.operid = operid;
 		resData.err = err;
 		resData.res = res;
+		resData.islistener = islistener;
 		this.socket.write(JSON.stringify(resData)+',');
 	}
 
