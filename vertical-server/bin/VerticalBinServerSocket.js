@@ -1,7 +1,8 @@
 class VerticalBinServerSocket
 {
-	constructor(socket)
+	constructor(vbs,socket)
 	{
+		this.vbs = vbs;
 		this.socket = socket;
 	}
 
@@ -13,7 +14,7 @@ class VerticalBinServerSocket
 	startServerSocket()
 	{
 		this.socket.on('data',(buffer)=>{
-			
+			this.runServerSocket(buffer);
 		});
 		this.socket.on('error',(error)=>{
 			console.log(error);
@@ -21,7 +22,19 @@ class VerticalBinServerSocket
 		this.socket.on('close',(had_error)=>{
 			console.log('close:'+had_error);
 		});
+	}
 
+	runServerSocket(buffer)
+	{
+		var jsonStr = buffer.toString();
+		var json = JSON.parse(jsonStr);
+		this.vbs[json.instruct](...json.param)
+		.then((res)=>{
+			this.writeData(json.operid,0,res);
+		})
+		.catch((err)=>{
+			this.writeData(json.operid,1,err.stack);
+		});
 	}
 
 	writeData(operid,err,res)

@@ -12,11 +12,11 @@ class VerticalBinServer
 		// this.verticalServer = new VerticalServer();
 	}
 
-	startServer()
+	start()
 	{
 		this.server = net.createServer();
 		this.server.on('connection',(socket)=>{
-			var vbss = new VerticalBinServerSocket(socket);
+			var vbss = new VerticalBinServerSocket(this,socket);
 			vbss.startServerSocket();
 		});
 		this.server.on('listening',()=>{
@@ -36,7 +36,7 @@ class VerticalBinServer
 		});
 	}
 
-	stopServer()
+	stop()
 	{
 		return new Promise((resolve,reject)=>{
 			this.server.close((res)=>{
@@ -44,15 +44,25 @@ class VerticalBinServer
 			});
 		});
 	}
+
+	restart()
+	{
+		return Promise.all([this.stop(),this.start()]);
+	}
+
+	sync(host,db)
+	{
+		
+	}
 }
 
 var verticalBinServer = new VerticalBinServer();
 
 verticalBinServer
-.startServer()
+.start()
 .then((res)=>{
 	console.log(res);
-	// verticalBinServer.stopServer();
+	// verticalBinServer.stop();
 })
 .catch((err)=>{
 	console.log(err);

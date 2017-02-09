@@ -50,10 +50,8 @@ class VerticalBin
 
 	sync(host,db)
 	{
-		var port = port;
-		var auth = '';
 		var stream = net.connect(this.sockPath);
-		this.sendInstruction(stream,'sync',[host,port,auth,db]);
+		this.sendInstruction(stream,'sync',[host,db]);
 	}
 
 	sendInstruction(stream,instruct,param)
@@ -67,8 +65,20 @@ class VerticalBin
 		};
 		stream.write(JSON.stringify(resData));
 		var instructFunc = (buffer)=>{
-			stream.end();
-			stream.removeListener('data', instructFunc);
+			var recData = JSON.parse(buffer.toString());
+			if (recData.openid==operid)
+			{
+				return new Promise((resolve,reject)=>{
+					if (recData.err==0)
+					{
+						resolve(recData.res);
+					} else {
+						reject(recData.res);
+					}
+					stream.end();
+					stream.removeListener('data', instructFunc);
+				});
+			}
 		};
 		stream.on('data',instructFunc);
 
