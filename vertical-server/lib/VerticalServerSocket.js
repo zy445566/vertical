@@ -30,7 +30,6 @@ class VerticalServerSocket
 			}
 		});
 		this.socket.on('timeout',()=>{
-			this.socket.end();
 			console.log('timeoutEvent');
 		});
 		this.socket.on('error',(error)=>{
