@@ -30,8 +30,14 @@ class VerticalBinServerSocket
 		var json = JSON.parse(jsonStr);
 		this.vbs[json.instruct](...json.param)
 		.then((res)=>{
-			if (json.instruct=='sync')
+			var endList = {
+				'start':1,
+				'stop':1,
+				'restart':1,
+			};
+			if (endList[json.instruct]!=1)
 			{
+				console.log(true);
 				this.writeData(json.operid,0,res);
 			}
 		})

@@ -61,6 +61,13 @@ class VerticalBinServer
 		});
 	}
 
+	ping()
+	{
+		return new Promise((resolve,reject)=>{
+			resolve(true);
+		});
+	}
+
 	sync(host,db)
 	{
 		

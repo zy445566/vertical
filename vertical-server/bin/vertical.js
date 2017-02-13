@@ -62,6 +62,9 @@ switch(process.argv[2])
 	case 'sync':
 	console.log('sync');
 	break;
+	case 'ping':
+	verticalBin.ping();
+	break;
 	default:
 	verticalBin.printArrayText(help);
 	break;

@@ -58,7 +58,6 @@ class VerticalBin
 	start()
 	{
 		var instruct = 'start';
-		console.log('(if can\'t start,del manually "'+CommonBin.getSocketPath()+'",please!)');
 		this.showRun(instruct);
 		var outFD = fs.openSync('../log/output.log', 'a');
     	var errFD = fs.openSync('../log/error.log', 'a');
@@ -71,6 +70,29 @@ class VerticalBin
     		}
     	);	
     	worker_process.unref();
+    	setTimeout(()=>{
+			this.sendInstruction(this.getStream(),'ping',[])
+			.then((res)=>{
+			console.log('start success!');
+			})
+			.catch((err)=>{
+				console.log('if can\'t start,del manually "'+CommonBin.getSocketPath()+'",please!');
+			});
+		},1000);
+
+	}
+
+	ping()
+	{
+		var instruct = 'ping';
+		// this.showRun(instruct);
+		this.sendInstruction(this.getStream(),instruct,[])
+		.then((res)=>{
+			console.log('pong');
+		})
+		.catch((err)=>{
+			console.log(err);
+		});
 	}
 
 	stop()
@@ -91,7 +113,10 @@ class VerticalBin
 	{
 		var instruct = 'sync';
 		this.showRun(instruct);
-		this.sendInstruction(this.getStream(),instruct,[host,db]);
+		this.sendInstruction(this.getStream(),instruct,[host,db])
+		.then((res)=>{
+			console.log(res);
+		});
 	}
 
 	sendInstruction(stream,instruct,param)
@@ -103,30 +128,36 @@ class VerticalBin
 			instruct:instruct,
 			param:param,
 		};
-		if (instruct!='sync')
+		var endList = {
+				'start':1,
+				'stop':1,
+				'restart':1,
+			};
+		if (endList[resData.instruct]==1)
 		{
 			stream.end(JSON.stringify(resData));
 			return;
 		}
 		stream.write(JSON.stringify(resData));
-		var instructFunc = (buffer)=>{
-			var recData = JSON.parse(buffer.toString());
-			if (recData.operid==operid)
-			{
-				return new Promise((resolve,reject)=>{
+		return new Promise((resolve,reject)=>{
+			var instructFunc = (buffer)=>{
+				var recData = JSON.parse(buffer.toString());
+				if (recData.operid==operid)
+				{
+					stream.end();
+					stream.removeListener('data', instructFunc);
 					if (recData.err==0)
 					{
 						resolve(recData.res);
 					} else {
 						reject(recData.res);
 					}
-					stream.end();
-					stream.removeListener('data', instructFunc);
-				});
+				}
 			}
-		};
-		stream.on('data',instructFunc);
-
+			stream.on('data',instructFunc);
+		});
+		
 	}
+
 }
 module.exports = VerticalBin;
