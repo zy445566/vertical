@@ -1,5 +1,6 @@
 var VerticalBin = require('./VerticalBin');
-var verticalBin = new VerticalBin();
+var verticalConfig = require('../conf/verticalConfig');
+var verticalBin = new VerticalBin(verticalConfig);
 var action = [
 "start","stop","restart","sync","help"
 ];

@@ -1,16 +1,17 @@
-const path = require('path');
 const net = require('net');
-// var VerticalServer = require('../lib/VerticalServer');
-var VerticalBinServerSocket = require('./VerticalBinServerSocket');
 const CommonBin = require('./CommonBin');
+var VerticalServer = require('../lib/VerticalServer');
+var VerticalBinServerSocket = require('./VerticalBinServerSocket');
+var verticalConfig = require('../conf/verticalConfig');
 
 class VerticalBinServer
 {
-	constructor()
+	constructor(config)
 	{
 		this.server = net.createServer();
 		this.sockPath = CommonBin.getSocketPath();
-		// this.verticalServer = new VerticalServer();
+		this.config = config;
+		this.verticalServer = new VerticalServer(config);
 	}
 
 	startEvent()
@@ -35,7 +36,13 @@ class VerticalBinServer
 		return new Promise((resolve,reject)=>{
 			this.startEvent();
 			this.server.listen(this.sockPath,()=>{
-				resolve(this.server.address());
+				this.verticalServer.startServer()
+				.then((res)=>{
+					resolve('local:'+this.server.address()+'  server:'+res);
+				})
+				.catch((err)=>{
+					reject(err);
+				});
 			});
 		});
 	}
@@ -44,7 +51,14 @@ class VerticalBinServer
 	{
 		return new Promise((resolve,reject)=>{
 			this.server.close(()=>{
-				resolve(true);
+				this.verticalServer
+				.stopServer()
+				.then((res)=>{
+					resolve(res);
+				})
+				.catch((err)=>{
+					reject(err);
+				});
 			});
 		});
 	}
@@ -52,11 +66,15 @@ class VerticalBinServer
 	restart()
 	{
 		return new Promise((resolve,reject)=>{
-			this.server.close(()=>{
-				// this.startEvent();
-				this.server.listen(this.sockPath,()=>{
-					resolve(this.server.address());
-				});
+			this.stop()
+			.then((res)=>{
+				return this.start();
+			})
+			.then((res)=>{
+				resolve(res);
+			})
+			.catch((err)=>{
+				reject(err);
 			});
 		});
 	}
@@ -74,7 +92,8 @@ class VerticalBinServer
 	}
 }
 
-var verticalBinServer = new VerticalBinServer();
+
+var verticalBinServer = new VerticalBinServer(verticalConfig);
 
 verticalBinServer
 .start()

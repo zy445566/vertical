@@ -50,8 +50,8 @@ class VerticalServer
 	stopServer()
 	{
 		return new Promise((resolve,reject)=>{
-			this.server.close((res)=>{
-				resolve(res);
+			this.server.close(()=>{
+				resolve(true);
 			});
 		});
 	}

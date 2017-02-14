@@ -7,9 +7,10 @@ const CommonBin = require('./CommonBin');
 
 class VerticalBin
 {
-	constructor()
+	constructor(config)
 	{
 		this.sockPath = CommonBin.getSocketPath();
+		this.config = config;
 	}
 
 	printArrayText(ary)
@@ -59,8 +60,10 @@ class VerticalBin
 	{
 		var instruct = 'start';
 		this.showRun(instruct);
-		var outFD = fs.openSync('../log/output.log', 'a');
-    	var errFD = fs.openSync('../log/error.log', 'a');
+		var outPath = path.join(this.config.logPath,'output.log');
+		var errPath = path.join(this.config.logPath,'error.log');
+		var outFD = fs.openSync(outPath, 'a');
+    	var errFD = fs.openSync(errPath, 'a');
     	var worker_process = child_process.spawn(
     		"node", 
     		["VerticalBinServer.js"],

@@ -6,8 +6,8 @@
   "bin": {
     "vertical-server": "./bin/vertical"
   },
-  "engines" : {
-    "node" : ">=6.9.1"
+  "engines": {
+    "node": ">=6.9.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -28,6 +28,6 @@
   },
   "homepage": "https://github.com/zy445566/vertical#readme",
   "dependencies": {
-    "level": "^1.5.0"
+    "level": "^1.6.0"
   }
 }
