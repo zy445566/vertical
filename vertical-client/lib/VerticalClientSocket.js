@@ -1,4 +1,6 @@
 var net = require('net');
+var crypto = require('crypto');
+
 class VerticalClientSocket
 {
 	constructor(config)
@@ -28,14 +30,31 @@ class VerticalClientSocket
 		});
 	}
 
+	getPass(nowtime)
+	{
+		if (!this.config.hasOwnProperty("auth"))
+		{
+			this.config.auth = '';
+		}
+		var md5 = crypto.createHash('md5');
+		md5.update(this.config.auth+nowtime);
+	    return md5.digest('hex');
+	}
+
+
+
 	writeData(method,params,db=null,listener=null,stream=null)
 	{
+		var nowtime = Date.now();
+		var pass = this.getPass(nowtime);
 		var nano = process.hrtime();
 		var operid = method+nano[0]+nano[1];
 		if (listener==null)
 		{
 			return new Promise((resolve,reject)=>{
 				this.socket.write(JSON.stringify({
+				nowtime:nowtime,
+				pass:pass,
 				operid:operid,
 				method:method,
 				params:params,
@@ -47,6 +66,8 @@ class VerticalClientSocket
 			});
 		} else {
 			this.socket.write(JSON.stringify({
+				nowtime:nowtime,
+				pass:pass,
 				operid:operid,
 				method:method,
 				params:params,
@@ -62,7 +83,7 @@ class VerticalClientSocket
 
 	recData(operid,succ,fail)
 	{
-		var listener = function (buffer)
+		var listener = (buffer)=>
 		{
 			var buf = buffer.slice(0,buffer.length-1);
 			var jsonStr = '['+buf.toString()+']';
@@ -80,7 +101,7 @@ class VerticalClientSocket
 					}
 					if (!recData.islistener)
 					{
-						this.socket.removeListener('data', this);
+						this.socket.removeListener('data', listener);
 					}
 				}
 			}

@@ -6,6 +6,7 @@ class VerticalServerRun
 	{
 		this.socket = socket;
 		this.vsl = new VerticalServerLevel();
+		this.config = config;
 		this.dbList = config.dbList;
 		this.eventList = config.eventList;
 		this.streamList = config.streamList;
@@ -142,8 +143,38 @@ class VerticalServerRun
 		});
 	}
 
+	getPass(nowtime)
+	{
+		if (!this.config.hasOwnProperty("auth"))
+		{
+			this.config.auth = '';
+		}
+		var md5 = crypto.createHash('md5');
+		md5.update(this.config.auth+nowtime);
+	    return md5.digest('hex');
+	}
+
 	run(operData)
 	{
+		
+		var nowtime = Date.now();
+		if (operData.nowtime>nowtime+300000 || operData.nowtime<nowtime-300000)
+		{
+			this.socket.writeData(operData.operid,1,[
+				'Time expired!server timestamp:'+
+				nowtime+
+				'-your timestamp:'+
+				operData.nowtime
+				]);
+			return;
+		} else {
+			var pass = this.getPass(operData.nowtime);
+			if (pass!=operData.pass)
+			{
+				this.socket.writeData(operData.operid,1,['password failure!']);
+				return;
+			}
+		}
 		if (operData.db==null)
 		{
 			var myPromise = this.runServerLevel(operData);

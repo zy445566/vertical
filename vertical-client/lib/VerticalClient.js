@@ -48,14 +48,8 @@ class VerticalClient
 	}
 }
 
-// var config ={
-// 	clusterList:[
-// 		{host:'127.0.0.1',port:5234,timeout:3000},
-// 		{host:'127.0.0.1',port:5234,timeout:3000}
-// 	]
-// }
 
-var vc = new VerticalClient({host:'127.0.0.1',port:5234,timeout:3000});
+var vc = new VerticalClient({host:'127.0.0.1',port:5234,timeout:3000,auth:"password"});
 var vcdb = null;
 vc.startVerticalClient();
 vc.level('./mydb')
