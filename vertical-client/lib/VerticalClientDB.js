@@ -17,7 +17,7 @@ class VerticalClientDB
 
 	close()
 	{
-		return this.socket.writeData('open',[],this.db);
+		return this.socket.writeData('close',[],this.db);
 	}
 
 	put(key,value,options={})

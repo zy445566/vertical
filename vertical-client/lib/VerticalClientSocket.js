@@ -12,15 +12,16 @@ class VerticalClientSocket
 
 	startVerticalClientSocket()
 	{
-		this.socket.on('timeout',()=>{
-			this.socket.end();
-			console.log('timeoutEvent');
-		});
+		// this.socket.on('timeout',()=>{
+		// 	this.socket.end();
+		// 	console.log('timeoutEvent');
+		// });
+		// this.socket.on('close',(had_error)=>{
+		// 	console.log('close:'+had_error);
+		// });
+		
 		this.socket.on('error',(error)=>{
 			console.log(error);
-		});
-		this.socket.on('close',(had_error)=>{
-			console.log('close:'+had_error);
 		});
 		return new Promise((resolve,reject)=>{
 			this.socket.connect(this.config.port, this.config.host, 

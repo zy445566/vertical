@@ -1,4 +1,5 @@
 var VerticalServerRun = require('./VerticalServerRun');
+var VerticalServerSync = require('./VerticalServerSync');
 class VerticalServerSocket
 {
 	constructor(socket,config)
@@ -6,10 +7,9 @@ class VerticalServerSocket
 		this.socket = socket;
 		this.socket.setTimeout(config.timeout);
 		this.eventList = {};
-		config.eventList = this.eventList;
 		this.streamList = {};
-		config.streamList = this.streamList;
 		this.vsr = new VerticalServerRun(this,config);
+		this.syncData  = {};
 	}
 
 	getServerSocket()
@@ -50,6 +50,11 @@ class VerticalServerSocket
 				this.streamList[streamId].destroy();
 				console.log('streamId:'+streamId);
 				delete this.streamList[streamId];
+			}
+			for (var syncData of this.syncData)
+			{
+				var vsSync = new VerticalServerSync(syncData,config);
+				vsSync.syncAll();
 			}
 			console.log('close:'+had_error);
 		});

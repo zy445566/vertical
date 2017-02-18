@@ -1,15 +1,14 @@
 var crypto = require('crypto');
-var VerticalServerLevel = require('./VerticalServerLevel');
 class VerticalServerRun
 {
 	constructor(socket,config)
 	{
 		this.socket = socket;
-		this.vsl = new VerticalServerLevel();
 		this.config = config;
 		this.dbList = config.dbList;
-		this.eventList = config.eventList;
-		this.streamList = config.streamList;
+		this.eventList = this.socket.eventList;
+		this.streamList = this.socket.streamList;
+		this.syncData = this.socket.syncData;
 	}
 
 	runServerLevel(operData)
@@ -17,21 +16,24 @@ class VerticalServerRun
 		switch (operData.method) {
 			case 'level':
 				var md5 = crypto.createHash('md5');
-				var db = md5.update(JSON.stringify(operData.params)).digest('hex');
+				var db = md5.update(JSON.stringify(operData.params[0])).digest('hex');
 				if (this.dbList.hasOwnProperty(db))
 				{
 					this.socket.writeData(operData.operid,0,[db]);
 					return;
 				}
-				var runFunc = this.genFunc(this.vsl,operData);
+				var runFunc = this.genFunc(this.config.vsl,operData);
 				if(runFunc == '[runFunc Error]'){return;}
 				return  runFunc.then((res)=>{
-					this.dbList[db] = res;
+					this.dbList[db] = {
+						'path':operData.params[0],
+						'db':res
+					};
 					this.socket.writeData(operData.operid,0,[db]);
 				});
 			break;
 			case 'destroy':
-				var runFunc = this.genFunc(this.vsl,operData);
+				var runFunc = this.genFunc(this.config.vsl,operData);
 				if(runFunc == '[runFunc Error]'){return;}
 				return  runFunc.then((res)=>{
 					var md5 = crypto.createHash('md5');
@@ -44,7 +46,7 @@ class VerticalServerRun
 				});
 			break;
 			default:
-				var runFunc = this.genFunc(this.vsl,operData);
+				var runFunc = this.genFunc(this.config.vsl,operData);
 				if(runFunc == '[runFunc Error]'){return;}
 				return  runFunc.then((res)=>{
 					this.socket.writeData(operData.operid,0,[res]);
@@ -55,21 +57,48 @@ class VerticalServerRun
 
 	runServerDB(operData)
 	{
+		var addSyncmethod = '';
+		var syncData = [];
 		switch (operData.method) {
 			case 'isOpen':
 			case 'isClosed':
 			case 'getProperty':
-				var runFunc = this.genFunc(this.dbList[operData.db],operData);
+				var runFunc = this.genFunc(this.dbList[operData.db]['db'],operData);
 				if(runFunc == '[runFunc Error]'){return;}
 				this.socket.writeData(operData.operid,0,[runFunc]);
 				return;
 			break;
 			case 'on':
-				var runEmit = this.genEmit(this.dbList[operData.db],operData);
+				var runEmit = this.genEmit(this.dbList[operData.db]['db'],operData);
 				if(runEmit == '[runEmit Error]'){return;}
 				break;
+			case 'put':
+				if (addSyncmethod=='')
+				{
+					syncData.push({ type: 'put', key: operData.params[0], value: operData.params[1] });
+					notAddSyncData = 'put';
+				}
+			case 'del':
+				if (addSyncmethod=='')
+				{
+					syncData.push({ type: 'del', key: operData.params[0] });
+					notAddSyncData = 'del';
+				}
+			case 'batch':
+				if (addSyncmethod=='')
+				{
+					syncData = operData.params[0];
+					notAddSyncData = 'batch';
+				}
+				if (this.syncData.hasOwnProperty(operData.db)) {
+					this.syncData[operData.db] = {
+						'path':operData.path,
+						'data':[]
+					};
+				};
+				this.syncData[operData.db].push(...syncData);
 			default:
-				var runFunc = this.genFunc(this.dbList[operData.db],operData);
+				var runFunc = this.genFunc(this.dbList[operData.db]['db'],operData);
 				if(runFunc == '[runFunc Error]'){return;}
 				return runFunc.then((res)=>{
 					this.socket.writeData(operData.operid,0,[res]);
@@ -154,6 +183,36 @@ class VerticalServerRun
 	    return md5.digest('hex');
 	}
 
+	acceptSync(operData)
+	{
+		try{
+
+		var md5 = crypto.createHash('md5');
+		var db = md5.update(JSON.stringify(operData.syncData.path)).digest('hex');
+		if (!this.dbList.hasOwnProperty(db))
+		{
+			var dbSyncFunc =  this.config.vsl.level(operData.syncData.path)
+			.then((res)=>{
+				this.dbList[db] = res;
+				return this.dbList[db].batch(operData.syncData.data);
+			});
+		} else {
+			var dbSyncFunc = this.dbList[db].batch(operData.syncData.data);
+		}
+
+		dbSyncFunc
+		.then((res)=>{
+			this.socket.writeData(operData.operid,0,[res]);
+		})
+		.catch((err)=>{
+			this.socket.writeData(operData.operid,1,[err.stack]);
+		});
+
+		} catch (err){
+			this.socket.writeData(operData.operid,1,[err.stack]);
+		}
+	}
+
 	run(operData)
 	{
 		
@@ -174,6 +233,12 @@ class VerticalServerRun
 				this.socket.writeData(operData.operid,1,['password failure!']);
 				return;
 			}
+		}
+
+		if (operData.method=='sync')
+		{
+			this.acceptSync(operData);
+			return;
 		}
 		if (operData.db==null)
 		{

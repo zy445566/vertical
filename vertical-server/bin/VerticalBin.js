@@ -27,9 +27,7 @@ class VerticalBin
 
 	getStream()
 	{
-
-		var socket = new net.Socket();
-		var stream = socket.connect(this.sockPath);
+		var stream = new net.Socket();
 		stream.setTimeout(3000);
 		stream.on('error',(error)=>{
 			if (error.syscall == 'connect')
@@ -39,7 +37,11 @@ class VerticalBin
 			}
 			
 		});
-		return stream;
+		return new Promise((resolve,reject)=>{
+			stream.connect(this.sockPath,()=>{
+				resolve(stream);
+			});
+		});
 	}
 
 	showRun(signText)
@@ -74,7 +76,10 @@ class VerticalBin
     	);	
     	worker_process.unref();
     	setTimeout(()=>{
-			this.sendInstruction(this.getStream(),'ping',[])
+    		this.getStream()
+    		.then((stream)=>{
+				return this.sendInstruction(this.stream,'ping',[]);
+			})
 			.then((res)=>{
 			console.log('start success!');
 			})
@@ -89,7 +94,10 @@ class VerticalBin
 	{
 		var instruct = 'ping';
 		// this.showRun(instruct);
-		this.sendInstruction(this.getStream(),instruct,[])
+		this.getStream()
+		.then((stream)=>{
+			return this.sendInstruction(stream,instruct,[]);
+		})
 		.then((res)=>{
 			console.log('pong');
 		})
@@ -102,23 +110,41 @@ class VerticalBin
 	{
 		var instruct = 'stop';
 		this.showRun(instruct);
-		this.sendInstruction(this.getStream(),instruct,[]);
+		this.getStream()
+		.then((stream)=>{
+			return this.sendInstruction(stream,instruct,[]);
+		})
+		.catch((err)=>{
+			console.log(err);
+		});
 	}
 
 	restart()
 	{
 		var instruct = 'restart';
 		this.showRun(instruct);
-		this.sendInstruction(this.getStream(),instruct,[]);
+		this.getStream()
+		.then((stream)=>{
+			return this.sendInstruction(stream,instruct,[]);
+		})
+		.catch((err)=>{
+			console.log(err);
+		});
 	}
 
 	sync(host,db)
 	{
 		var instruct = 'sync';
 		this.showRun(instruct);
-		this.sendInstruction(this.getStream(),instruct,[host,db])
+		this.getStream()
+		.then((stream)=>{
+			return this.sendInstruction(stream,instruct,[host,db]);
+		})
 		.then((res)=>{
 			console.log(res);
+		})
+		.catch((err)=>{
+			console.log(err);
 		});
 	}
 

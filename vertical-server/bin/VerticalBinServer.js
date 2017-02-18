@@ -88,7 +88,7 @@ class VerticalBinServer
 
 	sync(host,db)
 	{
-		
+		return this.verticalServer.syncServer(host,db);
 	}
 }
 

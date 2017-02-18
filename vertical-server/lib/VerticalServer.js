@@ -1,5 +1,8 @@
 var net = require('net');
 var VerticalServerSocket = require('./VerticalServerSocket');
+var VerticalServerSync = require('./VerticalServerSync');
+var VerticalServerLevel = require('./VerticalServerLevel');
+
 class VerticalServer
 {
 	constructor(config)
@@ -9,7 +12,7 @@ class VerticalServer
 		this.server = null;
 		this.dbList = {};
 		this.config.dbList = this.dbList;
-		
+		this.config.vsl = new VerticalServerLevel();
 	}
 
 	getServer()
@@ -44,7 +47,48 @@ class VerticalServer
 				resolve(this.server.address());
 			});
 		});
-		
+	}
+
+	syncServer(host,dbPath)
+	{
+		var md5 = crypto.createHash('md5');
+		var db = md5.update(JSON.stringify(dbPath)).digest('hex');
+		if (!this.config.dbList.hasOwnProperty(db))
+		{
+			var dbSyncFunc =  this.config.vsl.level(operData.syncData.path)
+			.then((res)=>{
+				this.config.dbList[db] = res;
+			});
+		} else {
+			var dbSyncFunc = new Promise((resolve,reject)=>{
+				resolve(true);
+			})
+			.then((res)=>{});
+		}
+
+		var syncData = {'path':dbPath,'data':[]};
+		var syncDataNum = 0;
+
+		dbSyncFunc
+		.then((res)=>{
+			this.config.dbList[db].createReadStream()
+				.on('data', function (data) {
+					var onePut = { type: 'put', key: data.key, value: data.value };
+				    syncData.data.push(onePut);
+				    syncDataNum++;
+				    if (syncDataNum>1000)
+				    {
+				    	var vsSync = new VerticalServerSync(syncData,this.config);
+				    	vsSync.sync(host);
+				    	syncData = {'path':dbPath,'data':[]};
+				    	syncDataNum = 0;
+				    }
+				});
+		})
+		.catch((err)=>{
+			console.log(err);
+		});
+
 	}
 
 	stopServer()
@@ -54,11 +98,6 @@ class VerticalServer
 				resolve(true);
 			});
 		});
-	}
-
-	syncServer(host,port,auth,db)
-	{
-
 	}
 
 }
