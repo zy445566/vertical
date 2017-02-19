@@ -1,6 +1,6 @@
 {
   "name": "vertical-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "super levelDB client",
   "main": "index.js",
   "scripts": {

@@ -3,6 +3,11 @@ levelDB distributed,BigTable model.
 
 #install
 		npm install -g vertical-server
+
+## vertical-server & vertical-client
+* [vertical-server](https://github.com/zy445566/vertical/tree/master/vertical-server "vertical-server")
+* [vertical-client](https://github.com/zy445566/vertical/tree/master/vertical-client "vertical-client")
+
 #use
 
 ##start server
