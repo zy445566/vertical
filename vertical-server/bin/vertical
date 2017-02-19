@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var VerticalBin = require('./VerticalBin');
 var verticalConfig = require('../conf/verticalConfig');
 var verticalBin = new VerticalBin(verticalConfig);

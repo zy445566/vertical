@@ -1,6 +1,6 @@
 {
   "name": "vertical-server",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "super levelDB server",
   "main": "index.js",
   "bin": {
@@ -28,6 +28,6 @@
   },
   "homepage": "https://github.com/zy445566/vertical#readme",
   "dependencies": {
-    "level": "^1.5.0"
+    "level": "^1.6.0"
   }
 }
