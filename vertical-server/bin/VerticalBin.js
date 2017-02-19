@@ -68,7 +68,7 @@ class VerticalBin
     	var errFD = fs.openSync(errPath, 'a');
     	var worker_process = child_process.spawn(
     		"node", 
-    		[path.join(path.dirname(__dirname),"VerticalBinServer.js")],
+    		[path.join(__dirname,"VerticalBinServer.js")],
     		{
     			detached : true,
     			stdio: ['ignore', outFD, errFD]
