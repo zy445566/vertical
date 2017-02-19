@@ -49,23 +49,23 @@ class VerticalClient
 }
 
 
-var vc = new VerticalClient({host:'127.0.0.1',port:5234,timeout:3000,auth:"password"});
-var vcdb = null;
-vc.startVerticalClient();
-vc.level('./mydb')
-.then((res)=>{
-	vcdb = res;
-	vcdb.createReadStream({'start':'a', 'end':'b'})
-	.on('data', function (data) {
-    console.log(data.key, '=', data.value)
-  	});
-})
-.then((res)=>{
-	// return vcdb.get('a');
-})
-.then((res)=>{
-	console.log(res);
-})
-.catch((err)=>{
-	console.log(err);
-});
+// var vc = new VerticalClient({host:'127.0.0.1',port:5234,timeout:3000,auth:"password"});
+// var vcdb = null;
+// vc.startVerticalClient();
+// vc.level('./mydb')
+// .then((res)=>{
+// 	vcdb = res;
+// 	return vcdb.put('a','aaa');
+// })
+// .then((res)=>{
+// 	console.log(res);
+// 	return vcdb.get('a');
+// })
+// .then((res)=>{
+// 	console.log(res);
+// })
+// .catch((err)=>{
+// 	console.log(err);
+// });
+
+module.exports = VerticalClient;

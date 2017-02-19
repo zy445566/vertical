@@ -9,14 +9,14 @@ class VerticalServerSync
 		this.config = config;
 	}
 
-	getConnect()
+	getConnect(host)
 	{
 		var socket = new net.Socket();
 		socket.on('error',(error)=>{
 			console.log(error);
 		});
 		return new Promise((resolve,reject)=>{
-			socket.connect(this.config.port,this.config.host,()=>{
+			socket.connect(this.config.port,host,()=>{
 				resolve(socket);
 			});
 		});
@@ -33,26 +33,28 @@ class VerticalServerSync
 	    return md5.digest('hex');
 	}
 
-	sendSync()
+	sendSync(socket)
 	{
+		var method = 'sync';
 		var nowtime = Date.now();
 		var pass = this.getPass(nowtime);
 		var nano = process.hrtime();
 		var operid = method+nano[0]+nano[1];
 		var sendData ={
 			'openid':operid,
+			'nowtime':nowtime,
 			'pass':pass,
-			'method':'sync',
+			'method':method,
 			'syncData':this.syncData,
 		};
-		this.socket.write(JSON.stringify(sendData);
+		socket.write(JSON.stringify(sendData)+',');
 	}
 
 	sync(host)
 	{
-		this.getConnect()
-		.then((connent)=>{
-			this.sendSync();
+		this.getConnect(host)
+		.then((socket)=>{
+			this.sendSync(socket);
 		})
 		.catch((err)=>{
 			console.log(err);
@@ -61,8 +63,8 @@ class VerticalServerSync
 
 	syncAll()
 	{
-		for (var host of this.serverList) {
-			this.sync(host);
+		for (var hostIndex in this.config.serverList) {
+			this.sync(this.config.serverList[hostIndex]);
 		};
 	}
 }

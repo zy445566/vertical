@@ -1,4 +1,5 @@
 var crypto = require('crypto');
+var path = require('path');
 class VerticalServerRun
 {
 	constructor(socket,config)
@@ -16,7 +17,8 @@ class VerticalServerRun
 		switch (operData.method) {
 			case 'level':
 				var md5 = crypto.createHash('md5');
-				var db = md5.update(JSON.stringify(operData.params[0])).digest('hex');
+				var dbPath = path.join(this.config.dataPath,operData.params[0]);
+				var db = md5.update(JSON.stringify(dbPath)).digest('hex');
 				if (this.dbList.hasOwnProperty(db))
 				{
 					this.socket.writeData(operData.operid,0,[db]);
@@ -26,7 +28,7 @@ class VerticalServerRun
 				if(runFunc == '[runFunc Error]'){return;}
 				return  runFunc.then((res)=>{
 					this.dbList[db] = {
-						'path':operData.params[0],
+						'path':dbPath,
 						'db':res
 					};
 					this.socket.writeData(operData.operid,0,[db]);
@@ -75,28 +77,28 @@ class VerticalServerRun
 			case 'put':
 				if (addSyncmethod=='')
 				{
-					syncData.push({ type: 'put', key: operData.params[0], value: operData.params[1] });
-					notAddSyncData = 'put';
+					syncData.push({ type: 'put', key: operData.params[0], value: operData.params[1]});
+					addSyncmethod = 'put';
 				}
 			case 'del':
 				if (addSyncmethod=='')
 				{
 					syncData.push({ type: 'del', key: operData.params[0] });
-					notAddSyncData = 'del';
+					addSyncmethod = 'del';
 				}
 			case 'batch':
 				if (addSyncmethod=='')
 				{
 					syncData = operData.params[0];
-					notAddSyncData = 'batch';
+					addSyncmethod = 'batch';
 				}
-				if (this.syncData.hasOwnProperty(operData.db)) {
+				if (!this.syncData.hasOwnProperty(operData.db)) {
 					this.syncData[operData.db] = {
-						'path':operData.path,
+						'path':this.dbList[operData.db].path,
 						'data':[]
 					};
 				};
-				this.syncData[operData.db].push(...syncData);
+				this.syncData[operData.db]['data'].push(...syncData);
 			default:
 				var runFunc = this.genFunc(this.dbList[operData.db]['db'],operData);
 				if(runFunc == '[runFunc Error]'){return;}
@@ -111,7 +113,7 @@ class VerticalServerRun
 	{
 		if (!this.streamList.hasOwnProperty(operData.stream.streamId))
 		{
-			this.streamList[operData.stream.streamId] = this.genFunc(this.dbList[operData.db],operData.stream);
+			this.streamList[operData.stream.streamId] = this.genFunc(this.dbList[operData.db]['db'],operData.stream);
 		}
 		var stream = this.streamList[operData.stream.streamId];
 		switch (operData.method) {
@@ -187,26 +189,26 @@ class VerticalServerRun
 	{
 		try{
 
-		var md5 = crypto.createHash('md5');
-		var db = md5.update(JSON.stringify(operData.syncData.path)).digest('hex');
-		if (!this.dbList.hasOwnProperty(db))
-		{
-			var dbSyncFunc =  this.config.vsl.level(operData.syncData.path)
-			.then((res)=>{
-				this.dbList[db] = res;
-				return this.dbList[db].batch(operData.syncData.data);
-			});
-		} else {
-			var dbSyncFunc = this.dbList[db].batch(operData.syncData.data);
-		}
+			var md5 = crypto.createHash('md5');
+			var db = md5.update(JSON.stringify(operData.syncData.path)).digest('hex');
+			if (!this.dbList.hasOwnProperty(db))
+			{
+				var dbSyncFunc =  this.config.vsl.level(operData.syncData.path)
+				.then((res)=>{
+					this.dbList[db] = res;
+					return this.dbList[db]['db'].batch(operData.syncData.data);
+				});
+			} else {
+				var dbSyncFunc = this.dbList[db]['db'].batch(operData.syncData.data);
+			}
 
-		dbSyncFunc
-		.then((res)=>{
-			this.socket.writeData(operData.operid,0,[res]);
-		})
-		.catch((err)=>{
-			this.socket.writeData(operData.operid,1,[err.stack]);
-		});
+			dbSyncFunc
+			.then((res)=>{
+				this.socket.writeData(operData.operid,0,[res]);
+			})
+			.catch((err)=>{
+				this.socket.writeData(operData.operid,1,[err.stack]);
+			});
 
 		} catch (err){
 			this.socket.writeData(operData.operid,1,[err.stack]);
@@ -215,7 +217,6 @@ class VerticalServerRun
 
 	run(operData)
 	{
-		
 		var nowtime = Date.now();
 		if (operData.nowtime>nowtime+300000 || operData.nowtime<nowtime-300000)
 		{

@@ -6,10 +6,11 @@ class VerticalServerSocket
 	{
 		this.socket = socket;
 		this.socket.setTimeout(config.timeout);
+		this.config = config;
 		this.eventList = {};
 		this.streamList = {};
-		this.vsr = new VerticalServerRun(this,config);
 		this.syncData  = {};
+		this.vsr = new VerticalServerRun(this,config);
 	}
 
 	getServerSocket()
@@ -30,6 +31,7 @@ class VerticalServerSocket
 			}
 		});
 		this.socket.on('timeout',()=>{
+			this.socket.end();
 			console.log('timeoutEvent');
 		});
 		this.socket.on('error',(error)=>{
@@ -51,9 +53,9 @@ class VerticalServerSocket
 				console.log('streamId:'+streamId);
 				delete this.streamList[streamId];
 			}
-			for (var syncData of this.syncData)
+			for (var syncDataIndex in this.syncData)
 			{
-				var vsSync = new VerticalServerSync(syncData,config);
+				var vsSync = new VerticalServerSync(this.syncData[syncDataIndex],this.config);
 				vsSync.syncAll();
 			}
 			console.log('close:'+had_error);

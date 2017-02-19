@@ -1,4 +1,6 @@
 var net = require('net');
+var path = require('path');
+var crypto = require('crypto');
 var VerticalServerSocket = require('./VerticalServerSocket');
 var VerticalServerSync = require('./VerticalServerSync');
 var VerticalServerLevel = require('./VerticalServerLevel');
@@ -49,13 +51,14 @@ class VerticalServer
 		});
 	}
 
-	syncServer(host,dbPath)
+	syncServer(host,syncPath)
 	{
 		var md5 = crypto.createHash('md5');
+		var dbPath = path.join(this.config.dataPath,syncPath);
 		var db = md5.update(JSON.stringify(dbPath)).digest('hex');
 		if (!this.config.dbList.hasOwnProperty(db))
 		{
-			var dbSyncFunc =  this.config.vsl.level(operData.syncData.path)
+			var dbSyncFunc =  this.config.vsl.level(dbPath)
 			.then((res)=>{
 				this.config.dbList[db] = res;
 			});
@@ -69,7 +72,7 @@ class VerticalServer
 		var syncData = {'path':dbPath,'data':[]};
 		var syncDataNum = 0;
 
-		dbSyncFunc
+		return dbSyncFunc
 		.then((res)=>{
 			this.config.dbList[db].createReadStream()
 				.on('data', function (data) {
@@ -78,12 +81,14 @@ class VerticalServer
 				    syncDataNum++;
 				    if (syncDataNum>1000)
 				    {
+				    	console.log(syncData,host);
 				    	var vsSync = new VerticalServerSync(syncData,this.config);
 				    	vsSync.sync(host);
 				    	syncData = {'path':dbPath,'data':[]};
 				    	syncDataNum = 0;
 				    }
 				});
+				return true;
 		})
 		.catch((err)=>{
 			console.log(err);
@@ -102,25 +107,9 @@ class VerticalServer
 
 }
 
-// const path = require('path');
+// const verticalConfig = require('../conf/verticalConfig');
 
-// var config = 
-// {
-// 	"dataPath":path.join(path.dirname(process.cwd()), "data"),
-// 	"logPath":path.join(path.dirname(process.cwd()), "log"),
-// 	"host":"127.0.0.1",
-// 	"port":5234,
-// 	"auth":"password",
-// 	"timeout":3000,
-// 	"serverList":[
-// 		"192.168.231.43",
-// 		"192.168.231.44",
-// 		"192.168.231.45",
-// 		"192.168.231.46",
-// 	],
-// }
-
-// var vs = new VerticalServer(config);
+// var vs = new VerticalServer(verticalConfig);
 // vs.startServer().then((res)=>{
 // 	console.log(res);
 // 	// vs.stopServer();

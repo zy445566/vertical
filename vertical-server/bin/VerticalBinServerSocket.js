@@ -37,7 +37,6 @@ class VerticalBinServerSocket
 			};
 			if (endList[json.instruct]!=1)
 			{
-				console.log(true);
 				this.writeData(json.operid,0,res);
 			}
 		})

@@ -75,13 +75,14 @@ class VerticalBin
     		}
     	);	
     	worker_process.unref();
+		
     	setTimeout(()=>{
     		this.getStream()
     		.then((stream)=>{
-				return this.sendInstruction(this.stream,'ping',[]);
+				return this.sendInstruction(stream,'ping',[]);
 			})
 			.then((res)=>{
-			console.log('start success!');
+				console.log('start success!');
 			})
 			.catch((err)=>{
 				console.log('if can\'t start,del manually "'+CommonBin.getSocketPath()+'",please!');
@@ -132,6 +133,11 @@ class VerticalBin
 		});
 	}
 
+	confPath()
+	{
+		console.log(path.join(__dirname,'../conf/verticalConfig.js'));
+	}
+
 	sync(host,db)
 	{
 		var instruct = 'sync';
@@ -141,7 +147,9 @@ class VerticalBin
 			return this.sendInstruction(stream,instruct,[host,db]);
 		})
 		.then((res)=>{
-			console.log(res);
+			setTimeout(()=>{
+				console.log('sync success');
+			},1000);
 		})
 		.catch((err)=>{
 			console.log(err);

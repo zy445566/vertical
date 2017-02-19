@@ -13,6 +13,7 @@ var help = [
 "stop	:	stop vertical-server >vertical-server stop",
 "restart	:	restart vertical-server >vertical-server restart",
 "sync	:	sync vertical-server >vertical-server sync 192.168.231.88 /mydata/mydb",
+"confPath	:	get conf Path >vertical-server confPath",
 ];
 
 var welcome = [
@@ -61,10 +62,13 @@ switch(process.argv[2])
 	verticalBin.restart();
 	break;
 	case 'sync':
-	console.log('sync');
+	verticalBin.sync(process.argv[3],process.argv[4]);
 	break;
 	case 'ping':
 	verticalBin.ping();
+	break;
+	case 'confPath':
+	verticalBin.confPath();
 	break;
 	default:
 	verticalBin.printArrayText(help);
