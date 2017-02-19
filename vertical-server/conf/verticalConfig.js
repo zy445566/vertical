@@ -1,8 +1,8 @@
 const path = require('path');
 var config = 
 {
-	"dataPath":path.join(path.dirname(process.cwd()), "data"),
-	"logPath":path.join(path.dirname(process.cwd()), "log"),
+	"dataPath":path.join(path.dirname(__dirname), "data"),
+	"logPath":path.join(path.dirname(__dirname), "log"),
 	"host":"127.0.0.1",
 	"port":5234,
 	"auth":"password",

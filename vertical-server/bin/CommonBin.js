@@ -9,9 +9,9 @@ class CommonBin
 		var platform=os.platform();
 		if (platform=='win32')
 		{
-			var sockPath = path.join('\\\\?\\pipe', process.cwd(), linstenPath);
+			var sockPath = path.join('\\\\?\\pipe', __dirname, linstenPath);
 		} else {
-			var sockPath = path.join(process.cwd(), linstenPath);
+			var sockPath = path.join(__dirname, linstenPath);
 		}
 		return sockPath;
 	}
