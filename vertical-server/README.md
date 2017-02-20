@@ -1,5 +1,5 @@
 # vertical-server(just beta now!)
-levelDB distributed,BigTable model.
+levelDB distributed,Server and Client!
 
 #install
 		npm install -g vertical-server
