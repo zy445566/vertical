@@ -1,5 +1,5 @@
 # vertical-client(just beta now!)
-levelDB distributed.Server and client.
+levelDB distributed.Server and Client!
 
 #install
 		npm install vertical-client
