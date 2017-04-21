@@ -1,3 +1,5 @@
+const os = require("os");
+
 class Common
 {
     static getDataKey(row_key,column_key,timestamp='')
@@ -5,11 +7,54 @@ class Common
         return 'data:'+row_key+':'+column_key+':'+timestamp;
     }
 
+    static getHostIP()
+    {
+        var netWorkList = os.networkInterfaces();
+        let ip ='127.0.0.1';
+        for(let netWorkIndex in netWorkList)
+        {
+            for(let netWork of netWorkList[netWorkIndex])
+            {
+                if (netWork.family=='IPv4' && netWork.address!='127.0.0.1')
+                {
+                    ip = netWork.address;
+                    break;
+                }
+            }
+            if (ip!='127.0.0.1')
+            {
+                break;
+            }
+        }
+        return ip;
+    }
+
+    static getSyncTimeKey(serverSign)
+    {
+        return 'syncTime:'+serverSign;
+    }
+
+    static getSyncSelfTime()
+    {
+        return 'syncSelfTime';
+    }
+
+    static getServerSignKey()
+    {
+        return 'serverSign';
+    }
+
+    static genServerSign()
+    {
+        let timestamp = Common.genTimestamp();
+        let hostIp  =  Common.getHostIP();
+        return hostIp+':'+timestamp;
+    }
+
     static genTimestamp()
     {
         var nano = process.hrtime();
-        timestamp = new Date().getTime()+nano[0]+nano[1];
-        return timestamp;
+        return new Date().getTime().toString()+nano[0].toString()+nano[1].toString();
     }
 
     static genDataKey(row_key,column_key,timestamp=null)
@@ -21,9 +66,12 @@ class Common
         return 'data:'+row_key+':'+column_key+':'+timestamp;
     }
 
-    static genSyncKey()
+    static genSyncKey(timestamp=null)
     {
-        timestamp = Common.genTimestamp();
+        if (timestamp==null)
+        {
+            timestamp = Common.genTimestamp();
+        }
         return 'sync:'+timestamp;
     }
 }

@@ -1,49 +1,97 @@
-var thrift = require("thrift");
-var Vertical = require('../thrift/gen-nodejs/Vertical');
-var VerticalTypes = require('../thrift/gen-nodejs/Vertical_types');
+const thrift = require("thrift");
+const Vertical = require('../thrift/gen-nodejs/Vertical');
+const VerticalTypes = require('../thrift/gen-nodejs/Vertical_types');
+const Method = require('./Method');
+const config = require("../config");
 
 var server = thrift.createServer(Vertical, {
-  ping: function(result) {
-    result(null);
+  ping: function (result) {
+    Method.getResult(result);
   },
-  useTable: function (table,result)
-  {
-    result(null,true);
+  getRow: function (data_key, result) {
+    Method.getResult(Method.getRow(
+      data_key.row_key,
+      data_key.column_key,
+      data_key.timestamp,
+      data_key.table
+    ),result);
   },
-  getRow: function (data_key,result) {
-    result(null,'xxxxxxxxx');
+  updateRow: function (data_key, row_value,result) {
+    Method.getResult(Method.updateRow(
+      data_key.row_key,
+      data_key.column_key,
+      row_value,
+      data_key.timestamp,
+      data_key.table
+    ),result);
   },
-  updateRow: function (data_key,row_value) {
-    result(null,1111111111111);
+  insertRow: function (data_key_gen, row_value,result) {
+    Method.getResult(Method.insertRow(
+      data_key_gen.row_key,
+      data_key_gen.column_key,
+      row_value,
+      data_key_gen.timestamp,
+      data_key_gen.table
+    ),result);
   },
-  insertRow: function (data_key_gen,row_value) {
-    result(null,1111111111111);
+  delRow: function (data_key, result) {
+    Method.getResult(Method.delRow(
+      data_key.row_key,
+      data_key.column_key,
+      data_key.timestamp,
+      data_key.table
+    ),result);
   },
-  delRow: function (data_key,result) {
-    result(null,true);
+  getColumn: function (data_column_key, data_column_option, result) {
+    Method.getResult(Method.getColumn(
+      data_column_key.row_key,
+      data_column_key.column_key,
+      data_column_key.table,
+      data_column_option.limit,
+      data_column_option.reverse,
+      data_column_option.fillCache
+    ),result);
   },
-  getColumn: function (data_column_key,data_column_option,result) {
-    result(null,'xxxxxxxxxx');
+  delColumn: function (data_column_key, data_column_option, result) {
+    Method.getResult(Method.delColumn(
+      data_column_key.row_key,
+      data_column_key.column_key,
+      data_column_key.table,
+      data_column_option.limit,
+      data_column_option.reverse,
+      data_column_option.fillCache
+    ),result);
   },
-  delColumn: function (data_column_key,data_column_option,result) {
-    result(null,'xxxxxxxxxx');
+  updateColum: function (data_column_key, row_value, data_column_option, result) {
+    Method.getResult(Method.updateColum(
+      data_column_key.row_key,
+      data_column_key.column_key,
+      data_column_key.table,
+      data_column_option.limit,
+      data_column_option.reverse,
+      data_column_option.fillCache
+    ),result);
   },
-  updateColum: function (data_column_key,row_value,data_column_option,result) {
-    result(null,123);
-  },
-  updateColum: function (data_column_key,row_value,data_column_option,result) {
-    result(null,123);
-  },
-  updateColum: function (data_column_key,row_value_list,result) {
-    result(null,123);
+  insertColum: function (data_column_key, row_value_list, result) {
+    Method.getResult(Method.insertColum(
+      data_column_key.row_key,
+      data_column_key.column_key,
+      row_value_list,
+      data_column_key.table
+    ),result);
   }
 });
 
-server.on('error', function(err) {
-    console.log(err);
-//   console.log(err.name);
-//   console.log(err.message);
-//   console.log(err.stack);
+server.on('error', function (err) {
+  //err.name err.message err.stack
+  console.log(err);
 })
 
-server.listen(5234);
+server.on('connection', function () {
+  console.log('connection');
+})
+
+//初始化数据库
+Method.InitServer();
+
+server.listen(config.serverPort);

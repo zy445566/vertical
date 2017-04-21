@@ -15,6 +15,7 @@ var DataKey = module.exports.DataKey = function(args) {
   this.row_key = null;
   this.column_key = null;
   this.timestamp = null;
+  this.table = null;
   if (args) {
     if (args.row_key !== undefined && args.row_key !== null) {
       this.row_key = args.row_key;
@@ -24,6 +25,9 @@ var DataKey = module.exports.DataKey = function(args) {
     }
     if (args.timestamp !== undefined && args.timestamp !== null) {
       this.timestamp = args.timestamp;
+    }
+    if (args.table !== undefined && args.table !== null) {
+      this.table = args.table;
     }
   }
 };
@@ -62,6 +66,13 @@ DataKey.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 4:
+      if (ftype == Thrift.Type.STRING) {
+        this.table = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -88,6 +99,11 @@ DataKey.prototype.write = function(output) {
     output.writeI64(this.timestamp);
     output.writeFieldEnd();
   }
+  if (this.table !== null && this.table !== undefined) {
+    output.writeFieldBegin('table', Thrift.Type.STRING, 4);
+    output.writeString(this.table);
+    output.writeFieldEnd();
+  }
   output.writeFieldStop();
   output.writeStructEnd();
   return;
@@ -97,6 +113,7 @@ var DataKeyGen = module.exports.DataKeyGen = function(args) {
   this.row_key = null;
   this.column_key = null;
   this.timestamp = null;
+  this.table = null;
   if (args) {
     if (args.row_key !== undefined && args.row_key !== null) {
       this.row_key = args.row_key;
@@ -106,6 +123,9 @@ var DataKeyGen = module.exports.DataKeyGen = function(args) {
     }
     if (args.timestamp !== undefined && args.timestamp !== null) {
       this.timestamp = args.timestamp;
+    }
+    if (args.table !== undefined && args.table !== null) {
+      this.table = args.table;
     }
   }
 };
@@ -144,6 +164,13 @@ DataKeyGen.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 4:
+      if (ftype == Thrift.Type.STRING) {
+        this.table = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -170,6 +197,11 @@ DataKeyGen.prototype.write = function(output) {
     output.writeI64(this.timestamp);
     output.writeFieldEnd();
   }
+  if (this.table !== null && this.table !== undefined) {
+    output.writeFieldBegin('table', Thrift.Type.STRING, 4);
+    output.writeString(this.table);
+    output.writeFieldEnd();
+  }
   output.writeFieldStop();
   output.writeStructEnd();
   return;
@@ -178,12 +210,16 @@ DataKeyGen.prototype.write = function(output) {
 var DataColumnKey = module.exports.DataColumnKey = function(args) {
   this.row_key = null;
   this.column_key = null;
+  this.table = null;
   if (args) {
     if (args.row_key !== undefined && args.row_key !== null) {
       this.row_key = args.row_key;
     }
     if (args.column_key !== undefined && args.column_key !== null) {
       this.column_key = args.column_key;
+    }
+    if (args.table !== undefined && args.table !== null) {
+      this.table = args.table;
     }
   }
 };
@@ -215,6 +251,13 @@ DataColumnKey.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.table = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -234,6 +277,11 @@ DataColumnKey.prototype.write = function(output) {
   if (this.column_key !== null && this.column_key !== undefined) {
     output.writeFieldBegin('column_key', Thrift.Type.STRING, 2);
     output.writeString(this.column_key);
+    output.writeFieldEnd();
+  }
+  if (this.table !== null && this.table !== undefined) {
+    output.writeFieldBegin('table', Thrift.Type.STRING, 3);
+    output.writeString(this.table);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

@@ -69,112 +69,6 @@ Vertical_ping_result.prototype.write = function(output) {
   return;
 };
 
-var Vertical_useTable_args = function(args) {
-  this.table = null;
-  if (args) {
-    if (args.table !== undefined && args.table !== null) {
-      this.table = args.table;
-    }
-  }
-};
-Vertical_useTable_args.prototype = {};
-Vertical_useTable_args.prototype.read = function(input) {
-  input.readStructBegin();
-  while (true)
-  {
-    var ret = input.readFieldBegin();
-    var fname = ret.fname;
-    var ftype = ret.ftype;
-    var fid = ret.fid;
-    if (ftype == Thrift.Type.STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 1:
-      if (ftype == Thrift.Type.STRING) {
-        this.table = input.readString();
-      } else {
-        input.skip(ftype);
-      }
-      break;
-      case 0:
-        input.skip(ftype);
-        break;
-      default:
-        input.skip(ftype);
-    }
-    input.readFieldEnd();
-  }
-  input.readStructEnd();
-  return;
-};
-
-Vertical_useTable_args.prototype.write = function(output) {
-  output.writeStructBegin('Vertical_useTable_args');
-  if (this.table !== null && this.table !== undefined) {
-    output.writeFieldBegin('table', Thrift.Type.STRING, 1);
-    output.writeString(this.table);
-    output.writeFieldEnd();
-  }
-  output.writeFieldStop();
-  output.writeStructEnd();
-  return;
-};
-
-var Vertical_useTable_result = function(args) {
-  this.success = null;
-  if (args) {
-    if (args.success !== undefined && args.success !== null) {
-      this.success = args.success;
-    }
-  }
-};
-Vertical_useTable_result.prototype = {};
-Vertical_useTable_result.prototype.read = function(input) {
-  input.readStructBegin();
-  while (true)
-  {
-    var ret = input.readFieldBegin();
-    var fname = ret.fname;
-    var ftype = ret.ftype;
-    var fid = ret.fid;
-    if (ftype == Thrift.Type.STOP) {
-      break;
-    }
-    switch (fid)
-    {
-      case 0:
-      if (ftype == Thrift.Type.BOOL) {
-        this.success = input.readBool();
-      } else {
-        input.skip(ftype);
-      }
-      break;
-      case 0:
-        input.skip(ftype);
-        break;
-      default:
-        input.skip(ftype);
-    }
-    input.readFieldEnd();
-  }
-  input.readStructEnd();
-  return;
-};
-
-Vertical_useTable_result.prototype.write = function(output) {
-  output.writeStructBegin('Vertical_useTable_result');
-  if (this.success !== null && this.success !== undefined) {
-    output.writeFieldBegin('success', Thrift.Type.BOOL, 0);
-    output.writeBool(this.success);
-    output.writeFieldEnd();
-  }
-  output.writeFieldStop();
-  output.writeStructEnd();
-  return;
-};
-
 var Vertical_getRow_args = function(args) {
   this.data_key = null;
   if (args) {
@@ -1180,53 +1074,6 @@ VerticalClient.prototype.recv_ping = function(input,mtype,rseqid) {
 
   callback(null);
 };
-VerticalClient.prototype.useTable = function(table, callback) {
-  this._seqid = this.new_seqid();
-  if (callback === undefined) {
-    var _defer = Q.defer();
-    this._reqs[this.seqid()] = function(error, result) {
-      if (error) {
-        _defer.reject(error);
-      } else {
-        _defer.resolve(result);
-      }
-    };
-    this.send_useTable(table);
-    return _defer.promise;
-  } else {
-    this._reqs[this.seqid()] = callback;
-    this.send_useTable(table);
-  }
-};
-
-VerticalClient.prototype.send_useTable = function(table) {
-  var output = new this.pClass(this.output);
-  output.writeMessageBegin('useTable', Thrift.MessageType.CALL, this.seqid());
-  var args = new Vertical_useTable_args();
-  args.table = table;
-  args.write(output);
-  output.writeMessageEnd();
-  return this.output.flush();
-};
-
-VerticalClient.prototype.recv_useTable = function(input,mtype,rseqid) {
-  var callback = this._reqs[rseqid] || function() {};
-  delete this._reqs[rseqid];
-  if (mtype == Thrift.MessageType.EXCEPTION) {
-    var x = new Thrift.TApplicationException();
-    x.read(input);
-    input.readMessageEnd();
-    return callback(x);
-  }
-  var result = new Vertical_useTable_result();
-  result.read(input);
-  input.readMessageEnd();
-
-  if (null !== result.success) {
-    return callback(null, result.success);
-  }
-  return callback('useTable failed: unknown result');
-};
 VerticalClient.prototype.getRow = function(data_key, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
@@ -1658,42 +1505,6 @@ VerticalProcessor.prototype.process_ping = function(seqid, input, output) {
       } else {
         result_obj = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
         output.writeMessageBegin("ping", Thrift.MessageType.EXCEPTION, seqid);
-      }
-      result_obj.write(output);
-      output.writeMessageEnd();
-      output.flush();
-    });
-  }
-};
-VerticalProcessor.prototype.process_useTable = function(seqid, input, output) {
-  var args = new Vertical_useTable_args();
-  args.read(input);
-  input.readMessageEnd();
-  if (this._handler.useTable.length === 1) {
-    Q.fcall(this._handler.useTable, args.table)
-      .then(function(result) {
-        var result_obj = new Vertical_useTable_result({success: result});
-        output.writeMessageBegin("useTable", Thrift.MessageType.REPLY, seqid);
-        result_obj.write(output);
-        output.writeMessageEnd();
-        output.flush();
-      }, function (err) {
-        var result;
-        result = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
-        output.writeMessageBegin("useTable", Thrift.MessageType.EXCEPTION, seqid);
-        result.write(output);
-        output.writeMessageEnd();
-        output.flush();
-      });
-  } else {
-    this._handler.useTable(args.table, function (err, result) {
-      var result_obj;
-      if ((err === null || typeof err === 'undefined')) {
-        result_obj = new Vertical_useTable_result((err !== null || typeof err === 'undefined') ? err : {success: result});
-        output.writeMessageBegin("useTable", Thrift.MessageType.REPLY, seqid);
-      } else {
-        result_obj = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
-        output.writeMessageBegin("useTable", Thrift.MessageType.EXCEPTION, seqid);
       }
       result_obj.write(output);
       output.writeMessageEnd();

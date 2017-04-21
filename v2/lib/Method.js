@@ -1,68 +1,84 @@
-const config = require('../config');
+const level = require("level");
+const path = require("path");
+const config = require("../config");
 const Common = require('./Common');
+
+var db = {};
+var syncData = {};
+var serverSign = null;
 
 class Method
 {
-    constructor(db)
+    static useTable (table='tmp')
     {
-        this.db = db;
-        this.syncData = [];
+        if (db.hasOwnProperty(table))
+        {
+            return db[table];
+        }
+        syncData[table] = [];
+        db[table] = level(path.join(config.dataDir,table));
+        return db[table];
     }
 
-    getRow(row_key,column_key,timestamp)
+    static getRow(row_key,column_key,timestamp,table='tmp')
     {
         return new Promise((reslove,reject)=>{
             let dataKey = Common.getDataKey(row_key,column_key,timestamp);
-            this.db.get(dataKey,(err, value)=>{
+            let db = Method.useTable(table);
+            db.get(dataKey,(err, value)=>{
                 if(err)reject(err);
                 reslove(value);
             })
         });
     }
 
-    updateRow(row_key,column_key,row_value,timestamp)
+
+    static updateRow(row_key,column_key,row_value,timestamp,table='tmp')
     {
-        return this.putRow(row_key,column_key,row_value,timestamp);
+        return this.putRow(row_key,column_key,row_value,timestamp,table);
     }
 
-    insertRow(row_key,column_key,row_value,timestamp=null)
+    static insertRow(row_key,column_key,row_value,timestamp=null,table='tmp')
     {
         if (timestamp==null)
         {
             timestamp = Common.genTimestamp();
         }
-        return this.putRow(row_key,column_key,row_value,timestamp);
+        return this.putRow(row_key,column_key,row_value,timestamp,table);
     }
 
-    putRow(row_key,column_key,row_value,timestamp)
+    static putRow(row_key,column_key,row_value,timestamp,table)
     {
         return new Promise((reslove,reject)=>{
             let dataKey = Common.genDataKey(row_key,column_key,timestamp);
-            this.syncData.push({type:'put',key:dataKey,value:row_value});
-            this.db.put(dataKey,row_value,(err)=>{
+            syncData[table].push({type:'put',key:dataKey,value:row_value});
+            let db = Method.useTable(table);
+            db.put(dataKey,row_value,(err)=>{
                 if(err)reject(err);
                 reslove(timestamp);
             });
         });
     }
 
-    delRow(row_key,column_key,timestamp)
+    static delRow(row_key,column_key,timestamp,table='tmp')
     {
         return new Promise((reslove,reject)=>{
             let dataKey = Common.getDataKey(row_key,column_key,timestamp);
-            this.syncData.push({type:'del',key:dataKey});
-            this.db.del(dataKey,(err)=>{
+            syncData[table].push({type:'del',key:dataKey});
+            let db = Method.useTable(table);
+            db.del(dataKey,(err)=>{
                 if(err)reject(err);
                 reslove(true);
             });
         });
     }
 
-    getColumn(row_key,column_key,limit=1,reverse=false,fillCache=false)
+    static getColumn(row_key,column_key,table='tmp',limit=1,reverse=false,fillCache=false)
     {
         return new Promise((reslove,reject)=>{
             let rowList =[];
             let start = Common.getDataKey(row_key,column_key);
+            let db = Method.useTable(table);
             db.createReadStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache})
             .on('data', function (data) {
                 let row = {};
@@ -81,16 +97,17 @@ class Method
         });
     }
 
-    delColumn(row_key,column_key,limit=1,reverse=false,fillCache=false)
+    static delColumn(row_key,column_key,table='tmp',limit=1,reverse=false,fillCache=false)
     {
         return new Promise((reslove,reject)=>{
             let start = Common.getDataKey(row_key,column_key);
             let batch = this.db.batch();
             let delCount = 0;
+            let db = Method.useTable(table);
             db.createKeyStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache})
             .on('data', function (dataKey) {
                 batch.del(dataKey);
-                this.syncData.push({type:'del',key:dataKey});
+                syncData[table].push({type:'del',key:dataKey});
                 delCount++;
             })
             .on('error', function (err) {
@@ -105,15 +122,16 @@ class Method
         });
     }
 
-    updateColum(row_key,column_key,row_value,limit=1,reverse=false,fillCache=false)
+    static updateColum(row_key,column_key,row_value,limit=1,reverse=false,fillCache=false)
     {
         return new Promise((reslove,reject)=>{
             let start = Common.getDataKey(row_key,column_key);
             let batch = this.db.batch();
             let updateCount = 0;
+            let db = Method.useTable(table);
             db.createKeyStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache})
             .on('data', function (dataKey) {
-                this.syncData.push({type:'put',key:dataKey,value:row_value});
+                syncData[table].push({type:'put',key:dataKey,value:row_value});
                 batch.put(dataKey,row_value);
                 updateCount++;
             })
@@ -129,15 +147,16 @@ class Method
         });
     }
 
-    insertColum(row_key,column_key,row_value_list)
+    static insertColum(row_key,column_key,row_value_list,table='tmp')
     {
         return new Promise((reslove,reject)=>{
-            let batch = this.db.batch();
+            let db = Method.useTable(table);
+            let batch = db.batch();
             let insertCount = 0;
             for(let row_value of row_value_list)
             {
                 let dataKey = Common.genDataKey(row_key,column_key,timestamp);
-                this.syncData.push({type:'put',key:dataKey,value:row_value});
+                syncData[table].push({type:'put',key:dataKey,value:row_value});
                 batch.put(dataKey,row_value);
                 insertCount++;
             }
@@ -147,16 +166,128 @@ class Method
         }); 
     }
 
-    addSyncData()
+    static InitServer()
+    {
+        //生成服务器唯一标识
+        let db = Method.useTable(config.sysTable);
+        let serverSignKey = Common.getServerSignKey();
+        db.get(serverSignKey,(err, value)=>{
+            if (err)
+            {
+                serverSign = Common.genServerSign();
+                db.put(serverSignKey,serverSign);
+            } else {
+                serverSign = value;
+            }
+            console.log(serverSign);
+        });
+    }
+
+    static addSyncData()
     {
         return new Promise((reslove,reject)=>{
-            let syncKey = Common.genSyncKey();
-            this.db.put(syncKey,this.syncData,{valueEncoding:'json'},(err)=>{
+            let db = Method.useTable(config.sysTable);
+            for (let table in syncData)
+            {
+                if (syncData[table].length>0)
+                {
+                    let syncKey = Common.genSyncKey();
+                    let syncTime = Common.genTimestamp();
+                    let syncIP = Common.getHostIP();
+                    db.put(syncKey,
+                    {
+                        table:table,
+                        syncTime:syncTime,
+                        syncIP:syncIP,
+                        data:syncData[table]
+                    },
+                    {valueEncoding:'json'},
+                    (err)=>{
+                        if(err)reject(err);
+                        syncData[table] = [];
+                    });
+                }  
+            }
+            let syncSelfTime = Common.genTimestamp();
+            db.put(Common.getSyncSelfTime(),syncSelfTime,(err)=>{
                 if(err)reject(err);
-                reslove(syncKey);
-                this.syncData = [];
+                reslove(syncSelfTime);
             });
         }); 
+    }
+
+    static getSyncSelfTime()
+    {
+        return new Promise((reslove,reject)=>{
+            let db = Method.useTable(config.sysTable);
+            db.get(Common.getSyncSelfTime(),(err, value)=>{
+                if(err)reslove(0);
+                reslove(value)
+            });
+        });
+    }
+
+    static isSync(serverSign,timestamp)
+    {
+        Method.getSyncTime(serverSign);
+    }
+
+    static getSyncTime(serverSign)
+    {
+        return new Promise((reslove,reject)=>{
+            let db = Method.useTable(config.sysTable);
+            let syncTimeKey = Common.getSyncTimeKey(serverSign);
+            db.get(syncTimeKey,(err, value)=>{
+                if(err)reslove(0);
+                reslove(value)
+            });
+        });
+    }
+
+    static readSyncData(syncTime)
+    {
+        return new Promise((reslove,reject)=>{
+            let db = Method.useTable(config.sysTable);
+            let syncKey = Common.genSyncKey(syncTime);
+            db.createReadStream({start:syncKey,reverse:false,fillCache:false})
+            .on('data', function (data) {
+                //同步数据到丛库
+            })
+            .on('error', function (err) {
+                reject(err);
+            })
+            .on('end', function () {
+                reslove(true);
+            });
+        });
+    }
+
+    static writeSyncData(syncWriteData)
+    {
+        return new Promise((reslove,reject)=>{
+            let db = Method.useTable(syncWriteData.table);
+            let syncTimeKey = Common.getSyncTimeKey(syncWriteData.syncIP);
+            syncWriteData.data.push({type: 'put', key: syncTimeKey, value: syncWriteData.syncTime});
+            db.batch(syncWriteData.data, function (err) {
+                if(err)reject(err);
+                reslove(syncWriteData.data.length);
+            });
+        }); 
+    }
+
+    static getResult(result,promiseFunc=null)
+    {
+        if (promiseFunc==null)
+        {
+            result(null);
+        } else {
+            promiseFunc
+            .then((res)=>{
+                result(null,res);
+            }).catch((err)=>{
+                result(err,null);
+            });
+        }
     }
 }
 

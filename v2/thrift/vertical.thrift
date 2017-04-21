@@ -10,17 +10,20 @@ struct DataKey {
 1:string row_key,
 2:string column_key,
 3:i64 timestamp,
+4:optional string table
 }
 
 struct DataKeyGen {
 1:string row_key,
 2:string column_key,
 3:optional i64 timestamp,
+4:optional string table
 }
 
 struct DataColumnKey {
 1:string row_key,
 2:string column_key,
+3:optional string table
 }
 
 struct DataColumnOption {
@@ -32,7 +35,6 @@ struct DataColumnOption {
 service Vertical
 {
   void ping(),
-  bool useTable(1:string table),
   string getRow(1:DataKey data_key),
   i64 updateRow(1:DataKey data_key,2:string row_value),
   i64 insertRow(1:DataKeyGen data_key_gen,2:string row_value),
@@ -40,5 +42,6 @@ service Vertical
   string getColumn(1:DataColumnKey data_column_key,2:DataColumnOption data_column_option),
   i32 delColumn(1:DataColumnKey data_column_key,2:DataColumnOption data_column_option),
   i32 updateColum(1:DataColumnKey data_column_key,2:string row_value,3:DataColumnOption data_column_option),
-  i32 insertColum(1:DataColumnKey data_column_key,3:string row_value_list)
+  i32 insertColum(1:DataColumnKey data_column_key,3:string row_value_list),
+  bool isSync(1:string server_sign,2:i64 timestamp),
 }
