@@ -51,7 +51,7 @@ class Client {
 
   updateRow(row_key,column_key,row_value,timestamp,table='tmp')
   {
-    let data_key_gen = new VerticalTypes.DataKey({
+    let data_key = new VerticalTypes.DataKey({
       row_key:row_key,
       column_key:column_key,
       row_value:JSON.stringify(row_value),
@@ -59,7 +59,7 @@ class Client {
       table:table
     });
     return new Promise((reslove, reject) => {
-      this.thriftClient.updateRow(data_key_gen,row_value,function (err, response) {
+      this.thriftClient.updateRow(data_key,JSON.stringify(row_value),function (err, response) {
         if(err)reject(err);
         reslove(response);
       });
@@ -71,12 +71,11 @@ class Client {
     let data_key_gen = new VerticalTypes.DataKeyGen({
       row_key:row_key,
       column_key:column_key,
-      row_value:JSON.stringify(row_value),
       timestamp:timestamp,
       table:table
     });
     return new Promise((reslove, reject) => {
-      this.thriftClient.insertRow(data_key_gen,row_value,function (err, response) {
+      this.thriftClient.insertRow(data_key_gen,JSON.stringify(row_value),function (err, response) {
         if(err)reject(err);
         reslove(response);
       });
@@ -97,11 +96,11 @@ class Client {
   getColumn(row_key,column_key,table='tmp',limit=1,reverse=false,fillCache=false)
   {
     let data_column_key = new VerticalTypes.DataColumnKey({row_key:row_key,column_key:column_key,table:table});
-    let data_column_option = new VerticalTypes.DataColumnOption({row_key:row_key,column_key:column_key});
+    let data_column_option = new VerticalTypes.DataColumnOption({limit:limit,reverse:reverse,fillCache:fillCache});
     return new Promise((reslove, reject) => {
       this.thriftClient.getColumn(data_column_key,data_column_option,function (err, response) {
         if(err)reject(err);
-        reslove(response);
+        reslove(JSON.parse(response));
       });
     });
   }
@@ -109,7 +108,7 @@ class Client {
   delColumn(row_key,column_key,table='tmp',limit=1,reverse=false,fillCache=false)
   {
     let data_column_key = new VerticalTypes.DataColumnKey({row_key:row_key,column_key:column_key,table:table});
-    let data_column_option = new VerticalTypes.DataColumnOption({row_key:row_key,column_key:column_key});
+    let data_column_option = new VerticalTypes.DataColumnOption({limit:limit,reverse:reverse,fillCache:fillCache});
     return new Promise((reslove, reject) => {
       this.thriftClient.delColumn(data_column_key,data_column_option,function (err, response) {
         if(err)reject(err);
@@ -121,7 +120,7 @@ class Client {
   updateColum(row_key,column_key,row_value,limit=1,reverse=false,fillCache=false)
   {
     let data_column_key = new VerticalTypes.DataColumnKey({row_key:row_key,column_key:column_key,table:table});
-    let data_column_option = new VerticalTypes.DataColumnOption({row_key:row_key,column_key:column_key});
+    let data_column_option = new VerticalTypes.DataColumnOption({limit:limit,reverse:reverse,fillCache:fillCache});
     return new Promise((reslove, reject) => {
       this.thriftClient.updateColum(data_column_key,row_value,data_column_option,function (err, response) {
         if(err)reject(err);

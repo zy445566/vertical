@@ -2,6 +2,7 @@ const level = require("level");
 const path = require("path");
 const config = require("../config");
 const Common = require('./Common');
+const VerticalTypes = require('../thrift/gen-nodejs/Vertical_types');
 
 var db = {};
 var syncData = {};
@@ -26,7 +27,7 @@ class Method
             let dataKey = Common.getDataKey(row_key,column_key,timestamp);
             let db = Method.useTable(table);
             db.get(dataKey,(err, value)=>{
-                if(err)reject(err);
+                if(err)reslove('{}');
                 reslove(value);
             })
         });
@@ -51,8 +52,8 @@ class Method
     {
         return new Promise((reslove,reject)=>{
             let dataKey = Common.genDataKey(row_key,column_key,timestamp);
-            syncData[table].push({type:'put',key:dataKey,value:row_value});
             let db = Method.useTable(table);
+            syncData[table].push({type:'put',key:dataKey,value:row_value});
             db.put(dataKey,row_value,(err)=>{
                 if(err)reject(err);
                 reslove(timestamp);
@@ -64,8 +65,8 @@ class Method
     {
         return new Promise((reslove,reject)=>{
             let dataKey = Common.getDataKey(row_key,column_key,timestamp);
-            syncData[table].push({type:'del',key:dataKey});
             let db = Method.useTable(table);
+            syncData[table].push({type:'del',key:dataKey});
             db.del(dataKey,(err)=>{
                 if(err)reject(err);
                 reslove(true);
@@ -79,7 +80,7 @@ class Method
             let rowList =[];
             let start = Common.getDataKey(row_key,column_key);
             let db = Method.useTable(table);
-            db.createReadStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache})
+            db.createReadStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache,valueEncoding:'json'})
             .on('data', function (data) {
                 let row = {};
                 row[data.key] = data.value;
@@ -89,7 +90,7 @@ class Method
                 reject(err);
             })
             .on('end', function () {
-                reslove(rowList);
+                reslove(JSON.stringify(rowList));
             });
             // .on('close', function () {
             //     console.log('Stream closed')
@@ -285,7 +286,7 @@ class Method
             .then((res)=>{
                 result(null,res);
             }).catch((err)=>{
-                result(err,null);
+                result(new VerticalTypes.VerticalError({message:err.stack}));
             });
         }
     }

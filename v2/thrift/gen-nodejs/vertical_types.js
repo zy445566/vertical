@@ -60,8 +60,8 @@ DataKey.prototype.read = function(input) {
       }
       break;
       case 3:
-      if (ftype == Thrift.Type.I64) {
-        this.timestamp = input.readI64();
+      if (ftype == Thrift.Type.STRING) {
+        this.timestamp = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -95,8 +95,8 @@ DataKey.prototype.write = function(output) {
     output.writeFieldEnd();
   }
   if (this.timestamp !== null && this.timestamp !== undefined) {
-    output.writeFieldBegin('timestamp', Thrift.Type.I64, 3);
-    output.writeI64(this.timestamp);
+    output.writeFieldBegin('timestamp', Thrift.Type.STRING, 3);
+    output.writeString(this.timestamp);
     output.writeFieldEnd();
   }
   if (this.table !== null && this.table !== undefined) {
@@ -158,8 +158,8 @@ DataKeyGen.prototype.read = function(input) {
       }
       break;
       case 3:
-      if (ftype == Thrift.Type.I64) {
-        this.timestamp = input.readI64();
+      if (ftype == Thrift.Type.STRING) {
+        this.timestamp = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -193,8 +193,8 @@ DataKeyGen.prototype.write = function(output) {
     output.writeFieldEnd();
   }
   if (this.timestamp !== null && this.timestamp !== undefined) {
-    output.writeFieldBegin('timestamp', Thrift.Type.I64, 3);
-    output.writeI64(this.timestamp);
+    output.writeFieldBegin('timestamp', Thrift.Type.STRING, 3);
+    output.writeString(this.timestamp);
     output.writeFieldEnd();
   }
   if (this.table !== null && this.table !== undefined) {
@@ -364,6 +364,62 @@ DataColumnOption.prototype.write = function(output) {
   if (this.fillCache !== null && this.fillCache !== undefined) {
     output.writeFieldBegin('fillCache', Thrift.Type.BOOL, 3);
     output.writeBool(this.fillCache);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+var VerticalError = module.exports.VerticalError = function(args) {
+  Thrift.TException.call(this, "VerticalError");
+  this.name = "VerticalError";
+  this.message = null;
+  if (args) {
+    if (args.message !== undefined && args.message !== null) {
+      this.message = args.message;
+    }
+  }
+};
+Thrift.inherits(VerticalError, Thrift.TException);
+VerticalError.prototype.name = 'VerticalError';
+VerticalError.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.message = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 0:
+        input.skip(ftype);
+        break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+VerticalError.prototype.write = function(output) {
+  output.writeStructBegin('VerticalError');
+  if (this.message !== null && this.message !== undefined) {
+    output.writeFieldBegin('message', Thrift.Type.STRING, 1);
+    output.writeString(this.message);
     output.writeFieldEnd();
   }
   output.writeFieldStop();

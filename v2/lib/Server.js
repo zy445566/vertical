@@ -1,6 +1,6 @@
 const thrift = require("thrift");
 const Vertical = require('../thrift/gen-nodejs/Vertical');
-const VerticalTypes = require('../thrift/gen-nodejs/Vertical_types');
+
 const Method = require('./Method');
 const config = require("../config");
 
@@ -9,76 +9,76 @@ var server = thrift.createServer(Vertical, {
     Method.getResult(result);
   },
   getRow: function (data_key, result) {
-    Method.getResult(Method.getRow(
+    Method.getResult(result,Method.getRow(
       data_key.row_key,
       data_key.column_key,
       data_key.timestamp,
       data_key.table
-    ),result);
+    ));
   },
   updateRow: function (data_key, row_value,result) {
-    Method.getResult(Method.updateRow(
+    Method.getResult(result,Method.updateRow(
       data_key.row_key,
       data_key.column_key,
       row_value,
       data_key.timestamp,
       data_key.table
-    ),result);
+    ));
   },
   insertRow: function (data_key_gen, row_value,result) {
-    Method.getResult(Method.insertRow(
+    Method.getResult(result,Method.insertRow(
       data_key_gen.row_key,
       data_key_gen.column_key,
       row_value,
       data_key_gen.timestamp,
       data_key_gen.table
-    ),result);
+    ));
   },
   delRow: function (data_key, result) {
-    Method.getResult(Method.delRow(
+    Method.getResult(result,Method.delRow(
       data_key.row_key,
       data_key.column_key,
       data_key.timestamp,
       data_key.table
-    ),result);
+    ));
   },
   getColumn: function (data_column_key, data_column_option, result) {
-    Method.getResult(Method.getColumn(
+    Method.getResult(result,Method.getColumn(
       data_column_key.row_key,
       data_column_key.column_key,
       data_column_key.table,
       data_column_option.limit,
       data_column_option.reverse,
       data_column_option.fillCache
-    ),result);
+    ));
   },
   delColumn: function (data_column_key, data_column_option, result) {
-    Method.getResult(Method.delColumn(
+    Method.getResult(result,Method.delColumn(
       data_column_key.row_key,
       data_column_key.column_key,
       data_column_key.table,
       data_column_option.limit,
       data_column_option.reverse,
       data_column_option.fillCache
-    ),result);
+    ));
   },
   updateColum: function (data_column_key, row_value, data_column_option, result) {
-    Method.getResult(Method.updateColum(
+    Method.getResult(result,Method.updateColum(
       data_column_key.row_key,
       data_column_key.column_key,
       data_column_key.table,
       data_column_option.limit,
       data_column_option.reverse,
       data_column_option.fillCache
-    ),result);
+    ));
   },
   insertColum: function (data_column_key, row_value_list, result) {
-    Method.getResult(Method.insertColum(
+    Method.getResult(result,Method.insertColum(
       data_column_key.row_key,
       data_column_key.column_key,
       row_value_list,
       data_column_key.table
-    ),result);
+    ));
   }
 });
 
