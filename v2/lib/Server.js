@@ -66,6 +66,7 @@ var server = thrift.createServer(Vertical, {
     Method.getResult(result,Method.updateColum(
       data_column_key.row_key,
       data_column_key.column_key,
+      row_value,
       data_column_key.table,
       data_column_option.limit,
       data_column_option.reverse,

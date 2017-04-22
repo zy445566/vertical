@@ -77,14 +77,13 @@ class Method
     static getColumn(row_key,column_key,table='tmp',limit=1,reverse=false,fillCache=false)
     {
         return new Promise((reslove,reject)=>{
-            let rowList =[];
+            let rowList ={};
             let start = Common.getDataKey(row_key,column_key);
+            let end = Common.getDataKey(row_key,column_key,'G');
             let db = Method.useTable(table);
-            db.createReadStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache,valueEncoding:'json'})
+            db.createReadStream({start:start,end:end,limit:limit,reverse:reverse,fillCache:fillCache,valueEncoding:'json'})
             .on('data', function (data) {
-                let row = {};
-                row[data.key] = data.value;
-                rowList.push(row);
+                rowList[data.key] = data.value;
             })
             .on('error', function (err) {
                 reject(err);
@@ -102,10 +101,11 @@ class Method
     {
         return new Promise((reslove,reject)=>{
             let start = Common.getDataKey(row_key,column_key);
-            let batch = this.db.batch();
+            let end = Common.getDataKey(row_key,column_key,'G');
             let delCount = 0;
             let db = Method.useTable(table);
-            db.createKeyStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache})
+            let batch = db.batch();
+            db.createKeyStream({start:start,end:end,limit:limit,reverse:reverse,fillCache:fillCache})
             .on('data', function (dataKey) {
                 batch.del(dataKey);
                 syncData[table].push({type:'del',key:dataKey});
@@ -123,14 +123,15 @@ class Method
         });
     }
 
-    static updateColum(row_key,column_key,row_value,limit=1,reverse=false,fillCache=false)
+    static updateColum(row_key,column_key,row_value,table='tmp',limit=1,reverse=false,fillCache=false)
     {
         return new Promise((reslove,reject)=>{
             let start = Common.getDataKey(row_key,column_key);
-            let batch = this.db.batch();
+            let end = Common.getDataKey(row_key,column_key,'G');
             let updateCount = 0;
             let db = Method.useTable(table);
-            db.createKeyStream({start:start,limit:limit,reverse:reverse,fillCache:fillCache})
+            let batch = db.batch();
+            db.createKeyStream({start:start,end:end,limit:limit,reverse:reverse,fillCache:fillCache})
             .on('data', function (dataKey) {
                 syncData[table].push({type:'put',key:dataKey,value:row_value});
                 batch.put(dataKey,row_value);
@@ -148,17 +149,18 @@ class Method
         });
     }
 
-    static insertColum(row_key,column_key,row_value_list,table='tmp')
+    static insertColum(row_key,column_key,row_value_list_str,table='tmp')
     {
+        let row_value_list = JSON.parse(row_value_list_str);
         return new Promise((reslove,reject)=>{
             let db = Method.useTable(table);
             let batch = db.batch();
             let insertCount = 0;
             for(let row_value of row_value_list)
             {
-                let dataKey = Common.genDataKey(row_key,column_key,timestamp);
+                let dataKey = Common.genDataKey(row_key,column_key,Common.genTimestamp());
                 syncData[table].push({type:'put',key:dataKey,value:row_value});
-                batch.put(dataKey,row_value);
+                batch.put(dataKey,row_value,{valueEncoding:'json'});
                 insertCount++;
             }
             batch.write(()=> {
