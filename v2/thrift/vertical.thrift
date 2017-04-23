@@ -47,5 +47,6 @@ service Vertical
   i32 delColumn(1:DataColumnKey data_column_key,2:DataColumnOption data_column_option) throws (1:VerticalError error),
   i32 updateColum(1:DataColumnKey data_column_key,2:string row_value,3:DataColumnOption data_column_option) throws (1:VerticalError error),
   i32 insertColum(1:DataColumnKey data_column_key,3:string row_value_list) throws (1:VerticalError error),
-  bool isSync(1:string server_sign,2:i64 timestamp) throws (1:VerticalError error)
+  string isSync(1:string server_sign,2:string timestamp) throws (1:VerticalError error),
+  i32 writeSyncData(1:string sync_write_data) throws (1:VerticalError error)
 }

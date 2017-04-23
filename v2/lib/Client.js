@@ -7,14 +7,16 @@ var transport = thrift.TBufferedTransport;
 var protocol = thrift.TBinaryProtocol;
 
 class Client {
-  constructor() {
+  constructor(host,port) {
     this.thriftConnection = null;
     this.thriftClient = null;
+    this.host = host;
+    this.port = port;
   }
 
-  connection(host, port) {
+  connection() {
     return new Promise((reslove, reject) => {
-      this.thriftConnection = thrift.createConnection(host, port, {
+      this.thriftConnection = thrift.createConnection(this.host, this.port, {
         transport: transport,
         protocol: protocol
       });
@@ -140,9 +142,24 @@ class Client {
     });
   }
 
-  isSync(syncIP,timestamp)
+  isSync(server_sign,timestamp)
   {
+    return new Promise((reslove, reject) => {
+      this.thriftClient.isSync(server_sign,timestamp,function (err, response) {
+        if(err)reject(err);
+        reslove(response);
+      });
+    });
+  }
 
+  writeSyncData(sync_write_data)
+  {
+    return new Promise((reslove, reject) => {
+      this.thriftClient.writeSyncData(sync_write_data,function (err, response) {
+        if(err)reject(err);
+        reslove(response);
+      });
+    });
   }
 
   disConnection()

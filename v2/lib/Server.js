@@ -80,6 +80,12 @@ var server = thrift.createServer(Vertical, {
       row_value_list,
       data_column_key.table
     ));
+  },
+  isSync: function (server_sign, timestamp, result) {
+    Method.getResult(result,Method.isSync(server_sign, timestamp));
+  },
+  writeSyncData: function (sync_write_data, result) {
+    Method.getResult(result,Method.writeSyncData(sync_write_data));
   }
 });
 
@@ -88,9 +94,9 @@ server.on('error', function (err) {
   console.log(err);
 })
 
-server.on('connection', function () {
-  console.log('connection');
-})
+// server.on('connection', function () {
+//   console.log('connection');
+// })
 
 //初始化数据库
 Method.InitServer();

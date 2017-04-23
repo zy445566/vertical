@@ -1200,8 +1200,8 @@ Vertical_isSync_args.prototype.read = function(input) {
       }
       break;
       case 2:
-      if (ftype == Thrift.Type.I64) {
-        this.timestamp = input.readI64();
+      if (ftype == Thrift.Type.STRING) {
+        this.timestamp = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -1223,8 +1223,8 @@ Vertical_isSync_args.prototype.write = function(output) {
     output.writeFieldEnd();
   }
   if (this.timestamp !== null && this.timestamp !== undefined) {
-    output.writeFieldBegin('timestamp', Thrift.Type.I64, 2);
-    output.writeI64(this.timestamp);
+    output.writeFieldBegin('timestamp', Thrift.Type.STRING, 2);
+    output.writeString(this.timestamp);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1263,8 +1263,8 @@ Vertical_isSync_result.prototype.read = function(input) {
     switch (fid)
     {
       case 0:
-      if (ftype == Thrift.Type.BOOL) {
-        this.success = input.readBool();
+      if (ftype == Thrift.Type.STRING) {
+        this.success = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -1289,8 +1289,132 @@ Vertical_isSync_result.prototype.read = function(input) {
 Vertical_isSync_result.prototype.write = function(output) {
   output.writeStructBegin('Vertical_isSync_result');
   if (this.success !== null && this.success !== undefined) {
-    output.writeFieldBegin('success', Thrift.Type.BOOL, 0);
-    output.writeBool(this.success);
+    output.writeFieldBegin('success', Thrift.Type.STRING, 0);
+    output.writeString(this.success);
+    output.writeFieldEnd();
+  }
+  if (this.error !== null && this.error !== undefined) {
+    output.writeFieldBegin('error', Thrift.Type.STRUCT, 1);
+    this.error.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+var Vertical_writeSyncData_args = function(args) {
+  this.sync_write_data = null;
+  if (args) {
+    if (args.sync_write_data !== undefined && args.sync_write_data !== null) {
+      this.sync_write_data = args.sync_write_data;
+    }
+  }
+};
+Vertical_writeSyncData_args.prototype = {};
+Vertical_writeSyncData_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.sync_write_data = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 0:
+        input.skip(ftype);
+        break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+Vertical_writeSyncData_args.prototype.write = function(output) {
+  output.writeStructBegin('Vertical_writeSyncData_args');
+  if (this.sync_write_data !== null && this.sync_write_data !== undefined) {
+    output.writeFieldBegin('sync_write_data', Thrift.Type.STRING, 1);
+    output.writeString(this.sync_write_data);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+var Vertical_writeSyncData_result = function(args) {
+  this.success = null;
+  this.error = null;
+  if (args instanceof ttypes.VerticalError) {
+    this.error = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined && args.success !== null) {
+      this.success = args.success;
+    }
+    if (args.error !== undefined && args.error !== null) {
+      this.error = args.error;
+    }
+  }
+};
+Vertical_writeSyncData_result.prototype = {};
+Vertical_writeSyncData_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.I32) {
+        this.success = input.readI32();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.error = new ttypes.VerticalError();
+        this.error.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+Vertical_writeSyncData_result.prototype.write = function(output) {
+  output.writeStructBegin('Vertical_writeSyncData_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.I32, 0);
+    output.writeI32(this.success);
     output.writeFieldEnd();
   }
   if (this.error !== null && this.error !== undefined) {
@@ -1813,6 +1937,56 @@ VerticalClient.prototype.recv_isSync = function(input,mtype,rseqid) {
   }
   return callback('isSync failed: unknown result');
 };
+VerticalClient.prototype.writeSyncData = function(sync_write_data, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_writeSyncData(sync_write_data);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_writeSyncData(sync_write_data);
+  }
+};
+
+VerticalClient.prototype.send_writeSyncData = function(sync_write_data) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('writeSyncData', Thrift.MessageType.CALL, this.seqid());
+  var args = new Vertical_writeSyncData_args();
+  args.sync_write_data = sync_write_data;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+VerticalClient.prototype.recv_writeSyncData = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new Vertical_writeSyncData_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.error) {
+    return callback(result.error);
+  }
+  if (null !== result.success) {
+    return callback(null, result.success);
+  }
+  return callback('writeSyncData failed: unknown result');
+};
 var VerticalProcessor = exports.Processor = function(handler) {
   this._handler = handler;
 }
@@ -2230,6 +2404,47 @@ VerticalProcessor.prototype.process_isSync = function(seqid, input, output) {
       } else {
         result_obj = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
         output.writeMessageBegin("isSync", Thrift.MessageType.EXCEPTION, seqid);
+      }
+      result_obj.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+};
+VerticalProcessor.prototype.process_writeSyncData = function(seqid, input, output) {
+  var args = new Vertical_writeSyncData_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.writeSyncData.length === 1) {
+    Q.fcall(this._handler.writeSyncData, args.sync_write_data)
+      .then(function(result) {
+        var result_obj = new Vertical_writeSyncData_result({success: result});
+        output.writeMessageBegin("writeSyncData", Thrift.MessageType.REPLY, seqid);
+        result_obj.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result;
+        if (err instanceof ttypes.VerticalError) {
+          result = new Vertical_writeSyncData_result(err);
+          output.writeMessageBegin("writeSyncData", Thrift.MessageType.REPLY, seqid);
+        } else {
+          result = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
+          output.writeMessageBegin("writeSyncData", Thrift.MessageType.EXCEPTION, seqid);
+        }
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.writeSyncData(args.sync_write_data, function (err, result) {
+      var result_obj;
+      if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
+        result_obj = new Vertical_writeSyncData_result((err !== null || typeof err === 'undefined') ? err : {success: result});
+        output.writeMessageBegin("writeSyncData", Thrift.MessageType.REPLY, seqid);
+      } else {
+        result_obj = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
+        output.writeMessageBegin("writeSyncData", Thrift.MessageType.EXCEPTION, seqid);
       }
       result_obj.write(output);
       output.writeMessageEnd();

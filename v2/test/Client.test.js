@@ -2,7 +2,7 @@ const Client = require('../lib/Client');
 const Common = require('../lib/Common');
 const test = require('ava');
 
-let client = new Client();
+let client = new Client('127.0.0.1', 5234);
 
 let table ='test';
 
@@ -17,12 +17,16 @@ function getList4GetColumn(res)
 }
 
 test.before('#connection',async t => {
-    await client.connection('127.0.0.1', 5234);
+    await client.connection();
 });
 
 test('#ping',t => {
+    let startTime = new Date().getTime();
 	return client.ping().then((res)=>{
         t.is(true,res);
+        let endTime = new Date().getTime();
+        // console.log('PingTime:'+(endTime-startTime));
+        // console.log('NetSpeed:'+(64/(endTime-startTime))+'b/ms');
     });
 });
 
@@ -121,6 +125,32 @@ test('#insertColum',t => {
         t.deepEqual([{name:'zs',age:23},{name:'ls',age:22},{name:'ww',age:21}],getList4GetColumn(res));
     }).then((res)=>{
         return client.delColumn('555','user',table,-1,false,false);
+    });
+});
+
+test('#isSync',t => {
+    let timestamp = Common.genTimestamp();
+	return client.isSync('test',timestamp)
+    .then((res)=>{
+        t.is('0',res);
+    });
+});
+
+test('#writeSyncData',t => {
+	return client.writeSyncData(JSON.stringify({
+        table:table,
+        syncTime:"3001",
+        serverSign:"test2",
+        data:[{type:"put",key:Common.getDataKey('666','user','8888'),value:'{"name":"ww","age":21}'}]
+    })).then((res)=>{
+        return client.isSync('test2',"9999")
+    }).then((res)=>{
+        t.plan(2);
+        t.is('3001',res);
+        return client.getRow('666','user','8888',table);
+    }).then((res)=>{
+        t.plan(2);
+        t.deepEqual({"name":"ww","age":21},res);
     });
 });
 

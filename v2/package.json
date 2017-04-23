@@ -2,7 +2,7 @@
   "name": "vertical",
   "version": "1.0.0",
   "description": "levelDB distributed,BigTable model.",
-  "main": "index.js",
+  "main": "./lib/Client.js",
   "scripts": {
     "test": "ava"
   },
