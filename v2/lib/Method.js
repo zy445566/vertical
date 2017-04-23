@@ -10,6 +10,7 @@ var syncData = {};
 var serverSign = null;
 var serverSyncSelfTime = null;
 var ClientList = {};
+var isSyncNow = {};
 
 class Method {
     static useTable(table = 'tmp') {
@@ -249,7 +250,9 @@ class Method {
         });
     }
 
-    static readSyncData(syncTime, client) {
+    static readSyncData(syncTime, server) {
+        let client = Method.getClient(server);
+        isSyncNow[server] = true;
         return new Promise((reslove, reject) => {
             let db = Method.useTable(config.sysTable);
             let syncStartKey = Common.genSyncKey(syncTime);
@@ -269,9 +272,11 @@ class Method {
                     })
                 })
                 .on('error', function (err) {
+                    isSyncNow[server] = false;
                     reject(err);
                 })
                 .on('cloase', function () {
+                    isSyncNow[server] = false;
                     reslove(syncCount);
                 });
         });
@@ -291,23 +296,25 @@ class Method {
         });
     }
 
-    static getClient(ip) {
-        if (ClientList.hasOwnProperty(ip)) {
-            return ClientList[ip];
+    static getClient(server) {
+        if (ClientList.hasOwnProperty(server)) {
+            return ClientList[server];
         }
-        ClientList[ip] = new Client(ip, config.serverPort);
-        return ClientList[ip];
+        isSyncNow[server] = false;
+        ClientList[server] = new Client(server, config.serverPort);
+        return ClientList[server];
     }
 
     static startSync() {
         for (let server of config.servers) {
+            if (isSyncNow[server]) continue;
             let client = Method.getClient(server);
             client.connection()
                 .then((res) => {
                     return client.isSync(Method.getServerSign(), Method.getServerSyncSelfTime());
                 }).then((res) => {
                     if (res != '-1') {
-                        return Method.readSyncData(res, client).then((res) => {
+                        return Method.readSyncData(res, server).then((res) => {
                                 console.log('SyncCount:' + res);
                         });
                     }
