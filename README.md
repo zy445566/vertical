@@ -34,6 +34,8 @@ more example:<a href="https://github.com/zy445566/vertical/test/Client.test.js">
 ```
 
 #ThriftCode(we use c,java,php,python when we use Vertical)
+
+<a href="https://thrift.apache.org/">Thrift Site</a>
 ```thrift
 namespace cpp vertical
 namespace d vertical
