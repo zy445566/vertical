@@ -11,6 +11,7 @@ var serverSign = null;
 var serverSyncSelfTime = null;
 var ClientList = {};
 var isSyncNow = {};
+var selfIP = null;
 
 class Method {
     static useTable(table = 'tmp') {
@@ -30,7 +31,7 @@ class Method {
         return serverSyncSelfTime;
     }
 
-    static getRow(row_key, column_key, timestamp, table = 'tmp') {
+    static getRow(row_key, column_key, timestamp, table) {
         return new Promise((reslove, reject) => {
             let dataKey = Common.getDataKey(row_key, column_key, timestamp);
             let db = Method.useTable(table);
@@ -42,11 +43,11 @@ class Method {
     }
 
 
-    static updateRow(row_key, column_key, row_value, timestamp, table = 'tmp') {
+    static updateRow(row_key, column_key, row_value, timestamp, table) {
         return this.putRow(row_key, column_key, row_value, timestamp, table);
     }
 
-    static insertRow(row_key, column_key, row_value, timestamp = null, table = 'tmp') {
+    static insertRow(row_key, column_key, row_value, timestamp, table) {
         if (timestamp == null) {
             timestamp = Common.genTimestamp();
         }
@@ -65,7 +66,7 @@ class Method {
         });
     }
 
-    static delRow(row_key, column_key, timestamp, table = 'tmp') {
+    static delRow(row_key, column_key, timestamp, table) {
         return new Promise((reslove, reject) => {
             let dataKey = Common.getDataKey(row_key, column_key, timestamp);
             let db = Method.useTable(table);
@@ -77,7 +78,7 @@ class Method {
         });
     }
 
-    static getColumn(row_key, column_key, table = 'tmp', limit = 1, reverse = false, fillCache = false) {
+    static getColumn(row_key, column_key, table, limit, reverse, fillCache) {
         return new Promise((reslove, reject) => {
             let rowList = {};
             let start = Common.getDataKey(row_key, column_key);
@@ -99,7 +100,7 @@ class Method {
         });
     }
 
-    static delColumn(row_key, column_key, table = 'tmp', limit = 1, reverse = false, fillCache = false) {
+    static delColumn(row_key, column_key, table, limit, reverse, fillCache) {
         return new Promise((reslove, reject) => {
             let start = Common.getDataKey(row_key, column_key);
             let end = Common.getDataKey(row_key, column_key, 'G');
@@ -124,7 +125,7 @@ class Method {
         });
     }
 
-    static updateColum(row_key, column_key, row_value, table = 'tmp', limit = 1, reverse = false, fillCache = false) {
+    static updateColum(row_key, column_key, row_value, table, limit, reverse, fillCache) {
         return new Promise((reslove, reject) => {
             let start = Common.getDataKey(row_key, column_key);
             let end = Common.getDataKey(row_key, column_key, 'G');
@@ -149,7 +150,7 @@ class Method {
         });
     }
 
-    static insertColum(row_key, column_key, row_value_list_str, table = 'tmp') {
+    static insertColum(row_key, column_key, row_value_list_str, table) {
         let row_value_list = JSON.parse(row_value_list_str);
         return new Promise((reslove, reject) => {
             let db = Method.useTable(table);
@@ -184,6 +185,7 @@ class Method {
         Method.getSyncSelfTime().then((res) => {
             serverSyncSelfTime = res;
         });
+        selfIP=Common.getHostIP();
         setInterval(Method.addSyncData, config.syncFrequence);
     }
 
@@ -307,7 +309,7 @@ class Method {
 
     static startSync() {
         for (let server of config.servers) {
-            if (isSyncNow[server]) continue;
+            if (isSyncNow[server] || server=='127.0.0.1' || server==selfIP ||server.toLowerCase()=='localhost') continue;
             let client = Method.getClient(server);
             client.connection()
                 .then((res) => {

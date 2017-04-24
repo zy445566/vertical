@@ -1,5 +1,6 @@
-const Client = require('../lib/Client');
-const Common = require('../lib/Common');
+const Vertical = require('../index');
+const Client = Vert.Client;
+const Common = Vert.Common;
 const test = require('ava');
 
 let client = new Client('127.0.0.1', 5234);

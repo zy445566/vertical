@@ -10,26 +10,26 @@ struct DataKey {
 1:string row_key,
 2:string column_key,
 3:string timestamp,
-4:optional string table
+4:string table
 }
 
 struct DataKeyGen {
 1:string row_key,
 2:string column_key,
-3:optional string timestamp,
-4:optional string table
+3:string timestamp,
+4:string table
 }
 
 struct DataColumnKey {
 1:string row_key,
 2:string column_key,
-3:optional string table
+3:string table
 }
 
 struct DataColumnOption {
-1:optional i32 limit,
-2:optional bool reverse,
-3:optional bool fillCache
+1:i32 limit,
+2:bool reverse,
+3:bool fillCache
 }
 
 exception VerticalError {
