@@ -1,7 +1,7 @@
 # vertical(V2)
 ##levelDB distributed,Server and Client!
 
-<a href="https://github.com/zy445566/vertical/v1">V1</a> is deprecated(recommend use V2,Strongly!);
+<a href="https://github.com/zy445566/vertical/tree/master/v1">V1</a> is deprecated(recommend use V2,Strongly!);
 
 <a name="use"></a>
 #How to use
@@ -24,7 +24,7 @@ client.insertRow('111','user',{name:'zs',age:20},timestamp,table).then((res)=>{
     console.log(res);
 })
 ```
-more example:<a href="https://github.com/zy445566/vertical/test/Client.test.js">click here</a>
+more example:<a href="https://github.com/zy445566/vertical/tree/master/test/Client.test.js">click here</a>
 
 >Server
 ```sh
