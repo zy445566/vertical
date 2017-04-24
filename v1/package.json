@@ -4,7 +4,7 @@
   "description": "levelDB distributed,BigTable model.",
   "main": "index.js",
   "scripts": {
-    "test": "ava"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -22,12 +22,5 @@
   "bugs": {
     "url": "https://github.com/zy445566/vertical/issues"
   },
-  "homepage": "https://github.com/zy445566/vertical#readme",
-  "dependencies": {
-    "level": "^1.6.0",
-    "thrift": "^0.10.0"
-  },
-  "devDependencies": {
-    "ava": "^0.19.1"
-  }
+  "homepage": "https://github.com/zy445566/vertical#readme"
 }
