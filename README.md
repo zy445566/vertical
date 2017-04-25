@@ -29,7 +29,9 @@ more example:<a href="https://github.com/zy445566/vertical/tree/master/test/Clie
 >Server
 ```sh
 >git clone https://github.com/zy445566/vertical.git
->cd vertical/lib
+>cd vertical
+>npm install
+>cd lib
 >node ./Server.js #Server start(recommend pm2 when production environment)
 ```
 
