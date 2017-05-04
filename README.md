@@ -1,8 +1,6 @@
 # vertical(V2)
 ##levelDB distributed,Server and Client!
 
-<a href="https://github.com/zy445566/vertical/tree/master/v1">V1</a> is deprecated(recommend use V2,Strongly!);
-
 <a name="use"></a>
 #How to use
 ----------------------
@@ -31,8 +29,7 @@ more example:<a href="https://github.com/zy445566/vertical/tree/master/test/Clie
 >git clone https://github.com/zy445566/vertical.git
 >cd vertical
 >npm install
->cd lib
->node ./Server.js #Server start(recommend pm2 when production environment)
+>npm run server #Server start(recommend pm2 when production environment)
 ```
 
 #ThriftCode(we use c,java,php,python when we use Vertical)

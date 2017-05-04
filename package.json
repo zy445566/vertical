@@ -4,7 +4,8 @@
   "description": "levelDB distributed,BigTable model.",
   "main": "index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava test/*",
+    "server": "node lib/Server.js"
   },
   "repository": {
     "type": "git",
