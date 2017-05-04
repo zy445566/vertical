@@ -4,6 +4,14 @@
 <a name="use"></a>
 #How to use
 ----------------------
+>Server
+```sh
+>git clone https://github.com/zy445566/vertical.git
+>cd vertical
+>npm install
+>npm run server #Server start(recommend pm2 when production environment)
+```
+
 >Client
 ```sh
 >cd your-project
@@ -24,13 +32,6 @@ client.insertRow('111','user',{name:'zs',age:20},timestamp,table).then((res)=>{
 ```
 more example:<a href="https://github.com/zy445566/vertical/tree/master/test/Client.test.js">click here</a>
 
->Server
-```sh
->git clone https://github.com/zy445566/vertical.git
->cd vertical
->npm install
->npm run server #Server start(recommend pm2 when production environment)
-```
 
 #ThriftCode(we use c,java,php,python when we use Vertical)
 
