@@ -26,6 +26,8 @@ const Common = Vertical.Common;
 let timestamp = Common.genTimestamp();
 let table = 'tmp';
 let client = new Client('127.0.0.1', 5234);
+
+//when node version<7.6 :
 client.connection().then((res)=>{
     return client.insertRow('111','user',{name:'zs',age:20},timestamp,table);
 })
@@ -37,6 +39,16 @@ client.connection().then((res)=>{
 }).catch((err)=>{
     console.log(err);
 });
+
+//when node version>=7.6 :
+async function example(){
+    await client.connection();
+    let res = await client.insertRow('111','user',{name:'zs',age:20},timestamp,table);
+    let getRes = await client.getRow('111','user',res,table);
+    console.log(res,getRes);
+    client.disConnection();
+}
+// example();
 ```
 more example:<a href="https://github.com/zy445566/vertical/tree/master/test/Client.test.js">click here</a>
 
