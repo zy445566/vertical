@@ -20,10 +20,11 @@
 ##easy example
 ```node
 const Vertical = require('vertical-db');
-const client = Vertical.Client;
-const common = Vertical.Common;
-let timestamp = common.genTimestamp();
+const Client = Vertical.Client;
+const Common = Vertical.Common;
+let timestamp = Common.genTimestamp();
 let table = 'tmp';
+let client = new Client('127.0.0.1', 5234);
 client.insertRow('111','user',{name:'zs',age:20},timestamp,table).then((res)=>{
     return client.getRow('111','user',res,table);
 }).then((res)=>{
