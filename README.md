@@ -22,14 +22,21 @@
 const Vertical = require('vertical-db');
 const Client = Vertical.Client;
 const Common = Vertical.Common;
+
 let timestamp = Common.genTimestamp();
 let table = 'tmp';
 let client = new Client('127.0.0.1', 5234);
-client.insertRow('111','user',{name:'zs',age:20},timestamp,table).then((res)=>{
+client.connection().then((res)=>{
+    return client.insertRow('111','user',{name:'zs',age:20},timestamp,table);
+})
+.then((res)=>{
     return client.getRow('111','user',res,table);
 }).then((res)=>{
     console.log(res);
-})
+    client.disConnection();
+}).catch((err)=>{
+    console.log(err);
+});
 ```
 more example:<a href="https://github.com/zy445566/vertical/tree/master/test/Client.test.js">click here</a>
 
