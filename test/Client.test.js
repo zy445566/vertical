@@ -2,6 +2,7 @@ const Vertical = require('../index');
 const Client = Vertical.Client;
 const Common = Vertical.Common;
 const test = require('ava');
+const jwt = require('jsonwebtoken');
 
 let client = new Client('127.0.0.1', 5234);
 
@@ -28,6 +29,23 @@ test('#ping',t => {
         let endTime = new Date().getTime();
         // console.log('PingTime:'+(endTime-startTime));
         // console.log('NetSpeed:'+(64/(endTime-startTime))+'b/ms');
+    });
+});
+
+var readKey = '';
+var writeKey = '';
+test('#getToken',t => {
+	return client.getToken(readKey,false).then((res)=>{
+        t.plan(2);
+        if (readKey == ''){readKey = 'noKey';}
+        // console.log(jwt.verify(res, readKey).is_write);
+        t.is(false,jwt.verify(res, readKey).is_write);
+        return client.getToken(writeKey,true);
+    }).then((res)=>{
+        t.plan(2);
+        if (writeKey == ''){writeKey = 'noKey';}
+        // console.log(jwt.verify(res, writeKey).is_write);
+        t.is(true,jwt.verify(res, writeKey).is_write);
     });
 });
 

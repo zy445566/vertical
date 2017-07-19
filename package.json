@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/zy445566/vertical#readme",
   "dependencies": {
+    "jsonwebtoken": "^7.4.1",
     "level": "^1.6.0",
     "thrift": "^0.10.0"
   },

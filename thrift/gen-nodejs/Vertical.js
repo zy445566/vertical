@@ -69,11 +69,152 @@ Vertical_ping_result.prototype.write = function(output) {
   return;
 };
 
+var Vertical_getToken_args = function(args) {
+  this.power_key = null;
+  this.is_write = null;
+  if (args) {
+    if (args.power_key !== undefined && args.power_key !== null) {
+      this.power_key = args.power_key;
+    }
+    if (args.is_write !== undefined && args.is_write !== null) {
+      this.is_write = args.is_write;
+    }
+  }
+};
+Vertical_getToken_args.prototype = {};
+Vertical_getToken_args.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 1:
+      if (ftype == Thrift.Type.STRING) {
+        this.power_key = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 2:
+      if (ftype == Thrift.Type.BOOL) {
+        this.is_write = input.readBool();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+Vertical_getToken_args.prototype.write = function(output) {
+  output.writeStructBegin('Vertical_getToken_args');
+  if (this.power_key !== null && this.power_key !== undefined) {
+    output.writeFieldBegin('power_key', Thrift.Type.STRING, 1);
+    output.writeString(this.power_key);
+    output.writeFieldEnd();
+  }
+  if (this.is_write !== null && this.is_write !== undefined) {
+    output.writeFieldBegin('is_write', Thrift.Type.BOOL, 2);
+    output.writeBool(this.is_write);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
+var Vertical_getToken_result = function(args) {
+  this.success = null;
+  this.error = null;
+  if (args instanceof ttypes.VerticalError) {
+    this.error = args;
+    return;
+  }
+  if (args) {
+    if (args.success !== undefined && args.success !== null) {
+      this.success = args.success;
+    }
+    if (args.error !== undefined && args.error !== null) {
+      this.error = args.error;
+    }
+  }
+};
+Vertical_getToken_result.prototype = {};
+Vertical_getToken_result.prototype.read = function(input) {
+  input.readStructBegin();
+  while (true)
+  {
+    var ret = input.readFieldBegin();
+    var fname = ret.fname;
+    var ftype = ret.ftype;
+    var fid = ret.fid;
+    if (ftype == Thrift.Type.STOP) {
+      break;
+    }
+    switch (fid)
+    {
+      case 0:
+      if (ftype == Thrift.Type.STRING) {
+        this.success = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      case 1:
+      if (ftype == Thrift.Type.STRUCT) {
+        this.error = new ttypes.VerticalError();
+        this.error.read(input);
+      } else {
+        input.skip(ftype);
+      }
+      break;
+      default:
+        input.skip(ftype);
+    }
+    input.readFieldEnd();
+  }
+  input.readStructEnd();
+  return;
+};
+
+Vertical_getToken_result.prototype.write = function(output) {
+  output.writeStructBegin('Vertical_getToken_result');
+  if (this.success !== null && this.success !== undefined) {
+    output.writeFieldBegin('success', Thrift.Type.STRING, 0);
+    output.writeString(this.success);
+    output.writeFieldEnd();
+  }
+  if (this.error !== null && this.error !== undefined) {
+    output.writeFieldBegin('error', Thrift.Type.STRUCT, 1);
+    this.error.write(output);
+    output.writeFieldEnd();
+  }
+  output.writeFieldStop();
+  output.writeStructEnd();
+  return;
+};
+
 var Vertical_getRow_args = function(args) {
   this.data_key = null;
+  this.token = null;
   if (args) {
     if (args.data_key !== undefined && args.data_key !== null) {
       this.data_key = new ttypes.DataKey(args.data_key);
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -99,9 +240,13 @@ Vertical_getRow_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
-      case 0:
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
         input.skip(ftype);
-        break;
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -116,6 +261,11 @@ Vertical_getRow_args.prototype.write = function(output) {
   if (this.data_key !== null && this.data_key !== undefined) {
     output.writeFieldBegin('data_key', Thrift.Type.STRUCT, 1);
     this.data_key.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 2);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -197,12 +347,16 @@ Vertical_getRow_result.prototype.write = function(output) {
 var Vertical_updateRow_args = function(args) {
   this.data_key = null;
   this.row_value = null;
+  this.token = null;
   if (args) {
     if (args.data_key !== undefined && args.data_key !== null) {
       this.data_key = new ttypes.DataKey(args.data_key);
     }
     if (args.row_value !== undefined && args.row_value !== null) {
       this.row_value = args.row_value;
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -235,6 +389,13 @@ Vertical_updateRow_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -254,6 +415,11 @@ Vertical_updateRow_args.prototype.write = function(output) {
   if (this.row_value !== null && this.row_value !== undefined) {
     output.writeFieldBegin('row_value', Thrift.Type.STRING, 2);
     output.writeString(this.row_value);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 3);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -335,12 +501,16 @@ Vertical_updateRow_result.prototype.write = function(output) {
 var Vertical_insertRow_args = function(args) {
   this.data_key_gen = null;
   this.row_value = null;
+  this.token = null;
   if (args) {
     if (args.data_key_gen !== undefined && args.data_key_gen !== null) {
       this.data_key_gen = new ttypes.DataKeyGen(args.data_key_gen);
     }
     if (args.row_value !== undefined && args.row_value !== null) {
       this.row_value = args.row_value;
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -373,6 +543,13 @@ Vertical_insertRow_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -392,6 +569,11 @@ Vertical_insertRow_args.prototype.write = function(output) {
   if (this.row_value !== null && this.row_value !== undefined) {
     output.writeFieldBegin('row_value', Thrift.Type.STRING, 2);
     output.writeString(this.row_value);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 3);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -472,9 +654,13 @@ Vertical_insertRow_result.prototype.write = function(output) {
 
 var Vertical_delRow_args = function(args) {
   this.data_key = null;
+  this.token = null;
   if (args) {
     if (args.data_key !== undefined && args.data_key !== null) {
       this.data_key = new ttypes.DataKey(args.data_key);
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -500,9 +686,13 @@ Vertical_delRow_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
-      case 0:
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
         input.skip(ftype);
-        break;
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -517,6 +707,11 @@ Vertical_delRow_args.prototype.write = function(output) {
   if (this.data_key !== null && this.data_key !== undefined) {
     output.writeFieldBegin('data_key', Thrift.Type.STRUCT, 1);
     this.data_key.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 2);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -598,12 +793,16 @@ Vertical_delRow_result.prototype.write = function(output) {
 var Vertical_getColumn_args = function(args) {
   this.data_column_key = null;
   this.data_column_option = null;
+  this.token = null;
   if (args) {
     if (args.data_column_key !== undefined && args.data_column_key !== null) {
       this.data_column_key = new ttypes.DataColumnKey(args.data_column_key);
     }
     if (args.data_column_option !== undefined && args.data_column_option !== null) {
       this.data_column_option = new ttypes.DataColumnOption(args.data_column_option);
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -637,6 +836,13 @@ Vertical_getColumn_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -656,6 +862,11 @@ Vertical_getColumn_args.prototype.write = function(output) {
   if (this.data_column_option !== null && this.data_column_option !== undefined) {
     output.writeFieldBegin('data_column_option', Thrift.Type.STRUCT, 2);
     this.data_column_option.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 3);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -737,12 +948,16 @@ Vertical_getColumn_result.prototype.write = function(output) {
 var Vertical_delColumn_args = function(args) {
   this.data_column_key = null;
   this.data_column_option = null;
+  this.token = null;
   if (args) {
     if (args.data_column_key !== undefined && args.data_column_key !== null) {
       this.data_column_key = new ttypes.DataColumnKey(args.data_column_key);
     }
     if (args.data_column_option !== undefined && args.data_column_option !== null) {
       this.data_column_option = new ttypes.DataColumnOption(args.data_column_option);
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -776,6 +991,13 @@ Vertical_delColumn_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -795,6 +1017,11 @@ Vertical_delColumn_args.prototype.write = function(output) {
   if (this.data_column_option !== null && this.data_column_option !== undefined) {
     output.writeFieldBegin('data_column_option', Thrift.Type.STRUCT, 2);
     this.data_column_option.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 3);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -877,6 +1104,7 @@ var Vertical_updateColum_args = function(args) {
   this.data_column_key = null;
   this.row_value = null;
   this.data_column_option = null;
+  this.token = null;
   if (args) {
     if (args.data_column_key !== undefined && args.data_column_key !== null) {
       this.data_column_key = new ttypes.DataColumnKey(args.data_column_key);
@@ -886,6 +1114,9 @@ var Vertical_updateColum_args = function(args) {
     }
     if (args.data_column_option !== undefined && args.data_column_option !== null) {
       this.data_column_option = new ttypes.DataColumnOption(args.data_column_option);
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -926,6 +1157,13 @@ Vertical_updateColum_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 4:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -950,6 +1188,11 @@ Vertical_updateColum_args.prototype.write = function(output) {
   if (this.data_column_option !== null && this.data_column_option !== undefined) {
     output.writeFieldBegin('data_column_option', Thrift.Type.STRUCT, 3);
     this.data_column_option.write(output);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 4);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1031,12 +1274,16 @@ Vertical_updateColum_result.prototype.write = function(output) {
 var Vertical_insertColum_args = function(args) {
   this.data_column_key = null;
   this.row_value_list = null;
+  this.token = null;
   if (args) {
     if (args.data_column_key !== undefined && args.data_column_key !== null) {
       this.data_column_key = new ttypes.DataColumnKey(args.data_column_key);
     }
     if (args.row_value_list !== undefined && args.row_value_list !== null) {
       this.row_value_list = args.row_value_list;
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -1069,6 +1316,13 @@ Vertical_insertColum_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 4:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -1088,6 +1342,11 @@ Vertical_insertColum_args.prototype.write = function(output) {
   if (this.row_value_list !== null && this.row_value_list !== undefined) {
     output.writeFieldBegin('row_value_list', Thrift.Type.STRING, 3);
     output.writeString(this.row_value_list);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 4);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1169,12 +1428,16 @@ Vertical_insertColum_result.prototype.write = function(output) {
 var Vertical_isSync_args = function(args) {
   this.server_sign = null;
   this.timestamp = null;
+  this.token = null;
   if (args) {
     if (args.server_sign !== undefined && args.server_sign !== null) {
       this.server_sign = args.server_sign;
     }
     if (args.timestamp !== undefined && args.timestamp !== null) {
       this.timestamp = args.timestamp;
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -1206,6 +1469,13 @@ Vertical_isSync_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
+      case 3:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
+        input.skip(ftype);
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -1225,6 +1495,11 @@ Vertical_isSync_args.prototype.write = function(output) {
   if (this.timestamp !== null && this.timestamp !== undefined) {
     output.writeFieldBegin('timestamp', Thrift.Type.STRING, 2);
     output.writeString(this.timestamp);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 3);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1305,9 +1580,13 @@ Vertical_isSync_result.prototype.write = function(output) {
 
 var Vertical_writeSyncData_args = function(args) {
   this.sync_write_data = null;
+  this.token = null;
   if (args) {
     if (args.sync_write_data !== undefined && args.sync_write_data !== null) {
       this.sync_write_data = args.sync_write_data;
+    }
+    if (args.token !== undefined && args.token !== null) {
+      this.token = args.token;
     }
   }
 };
@@ -1332,9 +1611,13 @@ Vertical_writeSyncData_args.prototype.read = function(input) {
         input.skip(ftype);
       }
       break;
-      case 0:
+      case 2:
+      if (ftype == Thrift.Type.STRING) {
+        this.token = input.readString();
+      } else {
         input.skip(ftype);
-        break;
+      }
+      break;
       default:
         input.skip(ftype);
     }
@@ -1349,6 +1632,11 @@ Vertical_writeSyncData_args.prototype.write = function(output) {
   if (this.sync_write_data !== null && this.sync_write_data !== undefined) {
     output.writeFieldBegin('sync_write_data', Thrift.Type.STRING, 1);
     output.writeString(this.sync_write_data);
+    output.writeFieldEnd();
+  }
+  if (this.token !== null && this.token !== undefined) {
+    output.writeFieldBegin('token', Thrift.Type.STRING, 2);
+    output.writeString(this.token);
     output.writeFieldEnd();
   }
   output.writeFieldStop();
@@ -1479,7 +1767,7 @@ VerticalClient.prototype.recv_ping = function(input,mtype,rseqid) {
 
   callback(null);
 };
-VerticalClient.prototype.getRow = function(data_key, callback) {
+VerticalClient.prototype.getToken = function(power_key, is_write, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1490,19 +1778,71 @@ VerticalClient.prototype.getRow = function(data_key, callback) {
         _defer.resolve(result);
       }
     };
-    this.send_getRow(data_key);
+    this.send_getToken(power_key, is_write);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_getRow(data_key);
+    this.send_getToken(power_key, is_write);
   }
 };
 
-VerticalClient.prototype.send_getRow = function(data_key) {
+VerticalClient.prototype.send_getToken = function(power_key, is_write) {
+  var output = new this.pClass(this.output);
+  output.writeMessageBegin('getToken', Thrift.MessageType.CALL, this.seqid());
+  var args = new Vertical_getToken_args();
+  args.power_key = power_key;
+  args.is_write = is_write;
+  args.write(output);
+  output.writeMessageEnd();
+  return this.output.flush();
+};
+
+VerticalClient.prototype.recv_getToken = function(input,mtype,rseqid) {
+  var callback = this._reqs[rseqid] || function() {};
+  delete this._reqs[rseqid];
+  if (mtype == Thrift.MessageType.EXCEPTION) {
+    var x = new Thrift.TApplicationException();
+    x.read(input);
+    input.readMessageEnd();
+    return callback(x);
+  }
+  var result = new Vertical_getToken_result();
+  result.read(input);
+  input.readMessageEnd();
+
+  if (null !== result.error) {
+    return callback(result.error);
+  }
+  if (null !== result.success) {
+    return callback(null, result.success);
+  }
+  return callback('getToken failed: unknown result');
+};
+VerticalClient.prototype.getRow = function(data_key, token, callback) {
+  this._seqid = this.new_seqid();
+  if (callback === undefined) {
+    var _defer = Q.defer();
+    this._reqs[this.seqid()] = function(error, result) {
+      if (error) {
+        _defer.reject(error);
+      } else {
+        _defer.resolve(result);
+      }
+    };
+    this.send_getRow(data_key, token);
+    return _defer.promise;
+  } else {
+    this._reqs[this.seqid()] = callback;
+    this.send_getRow(data_key, token);
+  }
+};
+
+VerticalClient.prototype.send_getRow = function(data_key, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('getRow', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_getRow_args();
   args.data_key = data_key;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1529,7 +1869,7 @@ VerticalClient.prototype.recv_getRow = function(input,mtype,rseqid) {
   }
   return callback('getRow failed: unknown result');
 };
-VerticalClient.prototype.updateRow = function(data_key, row_value, callback) {
+VerticalClient.prototype.updateRow = function(data_key, row_value, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1540,20 +1880,21 @@ VerticalClient.prototype.updateRow = function(data_key, row_value, callback) {
         _defer.resolve(result);
       }
     };
-    this.send_updateRow(data_key, row_value);
+    this.send_updateRow(data_key, row_value, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_updateRow(data_key, row_value);
+    this.send_updateRow(data_key, row_value, token);
   }
 };
 
-VerticalClient.prototype.send_updateRow = function(data_key, row_value) {
+VerticalClient.prototype.send_updateRow = function(data_key, row_value, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('updateRow', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_updateRow_args();
   args.data_key = data_key;
   args.row_value = row_value;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1580,7 +1921,7 @@ VerticalClient.prototype.recv_updateRow = function(input,mtype,rseqid) {
   }
   return callback('updateRow failed: unknown result');
 };
-VerticalClient.prototype.insertRow = function(data_key_gen, row_value, callback) {
+VerticalClient.prototype.insertRow = function(data_key_gen, row_value, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1591,20 +1932,21 @@ VerticalClient.prototype.insertRow = function(data_key_gen, row_value, callback)
         _defer.resolve(result);
       }
     };
-    this.send_insertRow(data_key_gen, row_value);
+    this.send_insertRow(data_key_gen, row_value, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_insertRow(data_key_gen, row_value);
+    this.send_insertRow(data_key_gen, row_value, token);
   }
 };
 
-VerticalClient.prototype.send_insertRow = function(data_key_gen, row_value) {
+VerticalClient.prototype.send_insertRow = function(data_key_gen, row_value, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('insertRow', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_insertRow_args();
   args.data_key_gen = data_key_gen;
   args.row_value = row_value;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1631,7 +1973,7 @@ VerticalClient.prototype.recv_insertRow = function(input,mtype,rseqid) {
   }
   return callback('insertRow failed: unknown result');
 };
-VerticalClient.prototype.delRow = function(data_key, callback) {
+VerticalClient.prototype.delRow = function(data_key, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1642,19 +1984,20 @@ VerticalClient.prototype.delRow = function(data_key, callback) {
         _defer.resolve(result);
       }
     };
-    this.send_delRow(data_key);
+    this.send_delRow(data_key, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_delRow(data_key);
+    this.send_delRow(data_key, token);
   }
 };
 
-VerticalClient.prototype.send_delRow = function(data_key) {
+VerticalClient.prototype.send_delRow = function(data_key, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('delRow', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_delRow_args();
   args.data_key = data_key;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1681,7 +2024,7 @@ VerticalClient.prototype.recv_delRow = function(input,mtype,rseqid) {
   }
   return callback('delRow failed: unknown result');
 };
-VerticalClient.prototype.getColumn = function(data_column_key, data_column_option, callback) {
+VerticalClient.prototype.getColumn = function(data_column_key, data_column_option, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1692,20 +2035,21 @@ VerticalClient.prototype.getColumn = function(data_column_key, data_column_optio
         _defer.resolve(result);
       }
     };
-    this.send_getColumn(data_column_key, data_column_option);
+    this.send_getColumn(data_column_key, data_column_option, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_getColumn(data_column_key, data_column_option);
+    this.send_getColumn(data_column_key, data_column_option, token);
   }
 };
 
-VerticalClient.prototype.send_getColumn = function(data_column_key, data_column_option) {
+VerticalClient.prototype.send_getColumn = function(data_column_key, data_column_option, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('getColumn', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_getColumn_args();
   args.data_column_key = data_column_key;
   args.data_column_option = data_column_option;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1732,7 +2076,7 @@ VerticalClient.prototype.recv_getColumn = function(input,mtype,rseqid) {
   }
   return callback('getColumn failed: unknown result');
 };
-VerticalClient.prototype.delColumn = function(data_column_key, data_column_option, callback) {
+VerticalClient.prototype.delColumn = function(data_column_key, data_column_option, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1743,20 +2087,21 @@ VerticalClient.prototype.delColumn = function(data_column_key, data_column_optio
         _defer.resolve(result);
       }
     };
-    this.send_delColumn(data_column_key, data_column_option);
+    this.send_delColumn(data_column_key, data_column_option, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_delColumn(data_column_key, data_column_option);
+    this.send_delColumn(data_column_key, data_column_option, token);
   }
 };
 
-VerticalClient.prototype.send_delColumn = function(data_column_key, data_column_option) {
+VerticalClient.prototype.send_delColumn = function(data_column_key, data_column_option, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('delColumn', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_delColumn_args();
   args.data_column_key = data_column_key;
   args.data_column_option = data_column_option;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1783,7 +2128,7 @@ VerticalClient.prototype.recv_delColumn = function(input,mtype,rseqid) {
   }
   return callback('delColumn failed: unknown result');
 };
-VerticalClient.prototype.updateColum = function(data_column_key, row_value, data_column_option, callback) {
+VerticalClient.prototype.updateColum = function(data_column_key, row_value, data_column_option, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1794,21 +2139,22 @@ VerticalClient.prototype.updateColum = function(data_column_key, row_value, data
         _defer.resolve(result);
       }
     };
-    this.send_updateColum(data_column_key, row_value, data_column_option);
+    this.send_updateColum(data_column_key, row_value, data_column_option, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_updateColum(data_column_key, row_value, data_column_option);
+    this.send_updateColum(data_column_key, row_value, data_column_option, token);
   }
 };
 
-VerticalClient.prototype.send_updateColum = function(data_column_key, row_value, data_column_option) {
+VerticalClient.prototype.send_updateColum = function(data_column_key, row_value, data_column_option, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('updateColum', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_updateColum_args();
   args.data_column_key = data_column_key;
   args.row_value = row_value;
   args.data_column_option = data_column_option;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1835,7 +2181,7 @@ VerticalClient.prototype.recv_updateColum = function(input,mtype,rseqid) {
   }
   return callback('updateColum failed: unknown result');
 };
-VerticalClient.prototype.insertColum = function(data_column_key, row_value_list, callback) {
+VerticalClient.prototype.insertColum = function(data_column_key, row_value_list, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1846,20 +2192,21 @@ VerticalClient.prototype.insertColum = function(data_column_key, row_value_list,
         _defer.resolve(result);
       }
     };
-    this.send_insertColum(data_column_key, row_value_list);
+    this.send_insertColum(data_column_key, row_value_list, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_insertColum(data_column_key, row_value_list);
+    this.send_insertColum(data_column_key, row_value_list, token);
   }
 };
 
-VerticalClient.prototype.send_insertColum = function(data_column_key, row_value_list) {
+VerticalClient.prototype.send_insertColum = function(data_column_key, row_value_list, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('insertColum', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_insertColum_args();
   args.data_column_key = data_column_key;
   args.row_value_list = row_value_list;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1886,7 +2233,7 @@ VerticalClient.prototype.recv_insertColum = function(input,mtype,rseqid) {
   }
   return callback('insertColum failed: unknown result');
 };
-VerticalClient.prototype.isSync = function(server_sign, timestamp, callback) {
+VerticalClient.prototype.isSync = function(server_sign, timestamp, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1897,20 +2244,21 @@ VerticalClient.prototype.isSync = function(server_sign, timestamp, callback) {
         _defer.resolve(result);
       }
     };
-    this.send_isSync(server_sign, timestamp);
+    this.send_isSync(server_sign, timestamp, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_isSync(server_sign, timestamp);
+    this.send_isSync(server_sign, timestamp, token);
   }
 };
 
-VerticalClient.prototype.send_isSync = function(server_sign, timestamp) {
+VerticalClient.prototype.send_isSync = function(server_sign, timestamp, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('isSync', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_isSync_args();
   args.server_sign = server_sign;
   args.timestamp = timestamp;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -1937,7 +2285,7 @@ VerticalClient.prototype.recv_isSync = function(input,mtype,rseqid) {
   }
   return callback('isSync failed: unknown result');
 };
-VerticalClient.prototype.writeSyncData = function(sync_write_data, callback) {
+VerticalClient.prototype.writeSyncData = function(sync_write_data, token, callback) {
   this._seqid = this.new_seqid();
   if (callback === undefined) {
     var _defer = Q.defer();
@@ -1948,19 +2296,20 @@ VerticalClient.prototype.writeSyncData = function(sync_write_data, callback) {
         _defer.resolve(result);
       }
     };
-    this.send_writeSyncData(sync_write_data);
+    this.send_writeSyncData(sync_write_data, token);
     return _defer.promise;
   } else {
     this._reqs[this.seqid()] = callback;
-    this.send_writeSyncData(sync_write_data);
+    this.send_writeSyncData(sync_write_data, token);
   }
 };
 
-VerticalClient.prototype.send_writeSyncData = function(sync_write_data) {
+VerticalClient.prototype.send_writeSyncData = function(sync_write_data, token) {
   var output = new this.pClass(this.output);
   output.writeMessageBegin('writeSyncData', Thrift.MessageType.CALL, this.seqid());
   var args = new Vertical_writeSyncData_args();
   args.sync_write_data = sync_write_data;
+  args.token = token;
   args.write(output);
   output.writeMessageEnd();
   return this.output.flush();
@@ -2042,12 +2391,53 @@ VerticalProcessor.prototype.process_ping = function(seqid, input, output) {
     });
   }
 };
+VerticalProcessor.prototype.process_getToken = function(seqid, input, output) {
+  var args = new Vertical_getToken_args();
+  args.read(input);
+  input.readMessageEnd();
+  if (this._handler.getToken.length === 2) {
+    Q.fcall(this._handler.getToken, args.power_key, args.is_write)
+      .then(function(result) {
+        var result_obj = new Vertical_getToken_result({success: result});
+        output.writeMessageBegin("getToken", Thrift.MessageType.REPLY, seqid);
+        result_obj.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      }, function (err) {
+        var result;
+        if (err instanceof ttypes.VerticalError) {
+          result = new Vertical_getToken_result(err);
+          output.writeMessageBegin("getToken", Thrift.MessageType.REPLY, seqid);
+        } else {
+          result = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
+          output.writeMessageBegin("getToken", Thrift.MessageType.EXCEPTION, seqid);
+        }
+        result.write(output);
+        output.writeMessageEnd();
+        output.flush();
+      });
+  } else {
+    this._handler.getToken(args.power_key, args.is_write, function (err, result) {
+      var result_obj;
+      if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
+        result_obj = new Vertical_getToken_result((err !== null || typeof err === 'undefined') ? err : {success: result});
+        output.writeMessageBegin("getToken", Thrift.MessageType.REPLY, seqid);
+      } else {
+        result_obj = new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, err.message);
+        output.writeMessageBegin("getToken", Thrift.MessageType.EXCEPTION, seqid);
+      }
+      result_obj.write(output);
+      output.writeMessageEnd();
+      output.flush();
+    });
+  }
+};
 VerticalProcessor.prototype.process_getRow = function(seqid, input, output) {
   var args = new Vertical_getRow_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.getRow.length === 1) {
-    Q.fcall(this._handler.getRow, args.data_key)
+  if (this._handler.getRow.length === 2) {
+    Q.fcall(this._handler.getRow, args.data_key, args.token)
       .then(function(result) {
         var result_obj = new Vertical_getRow_result({success: result});
         output.writeMessageBegin("getRow", Thrift.MessageType.REPLY, seqid);
@@ -2068,7 +2458,7 @@ VerticalProcessor.prototype.process_getRow = function(seqid, input, output) {
         output.flush();
       });
   } else {
-    this._handler.getRow(args.data_key, function (err, result) {
+    this._handler.getRow(args.data_key, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_getRow_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2087,8 +2477,8 @@ VerticalProcessor.prototype.process_updateRow = function(seqid, input, output) {
   var args = new Vertical_updateRow_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.updateRow.length === 2) {
-    Q.fcall(this._handler.updateRow, args.data_key, args.row_value)
+  if (this._handler.updateRow.length === 3) {
+    Q.fcall(this._handler.updateRow, args.data_key, args.row_value, args.token)
       .then(function(result) {
         var result_obj = new Vertical_updateRow_result({success: result});
         output.writeMessageBegin("updateRow", Thrift.MessageType.REPLY, seqid);
@@ -2109,7 +2499,7 @@ VerticalProcessor.prototype.process_updateRow = function(seqid, input, output) {
         output.flush();
       });
   } else {
-    this._handler.updateRow(args.data_key, args.row_value, function (err, result) {
+    this._handler.updateRow(args.data_key, args.row_value, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_updateRow_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2128,8 +2518,8 @@ VerticalProcessor.prototype.process_insertRow = function(seqid, input, output) {
   var args = new Vertical_insertRow_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.insertRow.length === 2) {
-    Q.fcall(this._handler.insertRow, args.data_key_gen, args.row_value)
+  if (this._handler.insertRow.length === 3) {
+    Q.fcall(this._handler.insertRow, args.data_key_gen, args.row_value, args.token)
       .then(function(result) {
         var result_obj = new Vertical_insertRow_result({success: result});
         output.writeMessageBegin("insertRow", Thrift.MessageType.REPLY, seqid);
@@ -2150,7 +2540,7 @@ VerticalProcessor.prototype.process_insertRow = function(seqid, input, output) {
         output.flush();
       });
   } else {
-    this._handler.insertRow(args.data_key_gen, args.row_value, function (err, result) {
+    this._handler.insertRow(args.data_key_gen, args.row_value, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_insertRow_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2169,8 +2559,8 @@ VerticalProcessor.prototype.process_delRow = function(seqid, input, output) {
   var args = new Vertical_delRow_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.delRow.length === 1) {
-    Q.fcall(this._handler.delRow, args.data_key)
+  if (this._handler.delRow.length === 2) {
+    Q.fcall(this._handler.delRow, args.data_key, args.token)
       .then(function(result) {
         var result_obj = new Vertical_delRow_result({success: result});
         output.writeMessageBegin("delRow", Thrift.MessageType.REPLY, seqid);
@@ -2191,7 +2581,7 @@ VerticalProcessor.prototype.process_delRow = function(seqid, input, output) {
         output.flush();
       });
   } else {
-    this._handler.delRow(args.data_key, function (err, result) {
+    this._handler.delRow(args.data_key, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_delRow_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2210,8 +2600,8 @@ VerticalProcessor.prototype.process_getColumn = function(seqid, input, output) {
   var args = new Vertical_getColumn_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.getColumn.length === 2) {
-    Q.fcall(this._handler.getColumn, args.data_column_key, args.data_column_option)
+  if (this._handler.getColumn.length === 3) {
+    Q.fcall(this._handler.getColumn, args.data_column_key, args.data_column_option, args.token)
       .then(function(result) {
         var result_obj = new Vertical_getColumn_result({success: result});
         output.writeMessageBegin("getColumn", Thrift.MessageType.REPLY, seqid);
@@ -2232,7 +2622,7 @@ VerticalProcessor.prototype.process_getColumn = function(seqid, input, output) {
         output.flush();
       });
   } else {
-    this._handler.getColumn(args.data_column_key, args.data_column_option, function (err, result) {
+    this._handler.getColumn(args.data_column_key, args.data_column_option, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_getColumn_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2251,8 +2641,8 @@ VerticalProcessor.prototype.process_delColumn = function(seqid, input, output) {
   var args = new Vertical_delColumn_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.delColumn.length === 2) {
-    Q.fcall(this._handler.delColumn, args.data_column_key, args.data_column_option)
+  if (this._handler.delColumn.length === 3) {
+    Q.fcall(this._handler.delColumn, args.data_column_key, args.data_column_option, args.token)
       .then(function(result) {
         var result_obj = new Vertical_delColumn_result({success: result});
         output.writeMessageBegin("delColumn", Thrift.MessageType.REPLY, seqid);
@@ -2273,7 +2663,7 @@ VerticalProcessor.prototype.process_delColumn = function(seqid, input, output) {
         output.flush();
       });
   } else {
-    this._handler.delColumn(args.data_column_key, args.data_column_option, function (err, result) {
+    this._handler.delColumn(args.data_column_key, args.data_column_option, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_delColumn_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2292,8 +2682,8 @@ VerticalProcessor.prototype.process_updateColum = function(seqid, input, output)
   var args = new Vertical_updateColum_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.updateColum.length === 3) {
-    Q.fcall(this._handler.updateColum, args.data_column_key, args.row_value, args.data_column_option)
+  if (this._handler.updateColum.length === 4) {
+    Q.fcall(this._handler.updateColum, args.data_column_key, args.row_value, args.data_column_option, args.token)
       .then(function(result) {
         var result_obj = new Vertical_updateColum_result({success: result});
         output.writeMessageBegin("updateColum", Thrift.MessageType.REPLY, seqid);
@@ -2314,7 +2704,7 @@ VerticalProcessor.prototype.process_updateColum = function(seqid, input, output)
         output.flush();
       });
   } else {
-    this._handler.updateColum(args.data_column_key, args.row_value, args.data_column_option, function (err, result) {
+    this._handler.updateColum(args.data_column_key, args.row_value, args.data_column_option, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_updateColum_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2333,8 +2723,8 @@ VerticalProcessor.prototype.process_insertColum = function(seqid, input, output)
   var args = new Vertical_insertColum_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.insertColum.length === 2) {
-    Q.fcall(this._handler.insertColum, args.data_column_key, args.row_value_list)
+  if (this._handler.insertColum.length === 3) {
+    Q.fcall(this._handler.insertColum, args.data_column_key, args.row_value_list, args.token)
       .then(function(result) {
         var result_obj = new Vertical_insertColum_result({success: result});
         output.writeMessageBegin("insertColum", Thrift.MessageType.REPLY, seqid);
@@ -2355,7 +2745,7 @@ VerticalProcessor.prototype.process_insertColum = function(seqid, input, output)
         output.flush();
       });
   } else {
-    this._handler.insertColum(args.data_column_key, args.row_value_list, function (err, result) {
+    this._handler.insertColum(args.data_column_key, args.row_value_list, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_insertColum_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2374,8 +2764,8 @@ VerticalProcessor.prototype.process_isSync = function(seqid, input, output) {
   var args = new Vertical_isSync_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.isSync.length === 2) {
-    Q.fcall(this._handler.isSync, args.server_sign, args.timestamp)
+  if (this._handler.isSync.length === 3) {
+    Q.fcall(this._handler.isSync, args.server_sign, args.timestamp, args.token)
       .then(function(result) {
         var result_obj = new Vertical_isSync_result({success: result});
         output.writeMessageBegin("isSync", Thrift.MessageType.REPLY, seqid);
@@ -2396,7 +2786,7 @@ VerticalProcessor.prototype.process_isSync = function(seqid, input, output) {
         output.flush();
       });
   } else {
-    this._handler.isSync(args.server_sign, args.timestamp, function (err, result) {
+    this._handler.isSync(args.server_sign, args.timestamp, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_isSync_result((err !== null || typeof err === 'undefined') ? err : {success: result});
@@ -2415,8 +2805,8 @@ VerticalProcessor.prototype.process_writeSyncData = function(seqid, input, outpu
   var args = new Vertical_writeSyncData_args();
   args.read(input);
   input.readMessageEnd();
-  if (this._handler.writeSyncData.length === 1) {
-    Q.fcall(this._handler.writeSyncData, args.sync_write_data)
+  if (this._handler.writeSyncData.length === 2) {
+    Q.fcall(this._handler.writeSyncData, args.sync_write_data, args.token)
       .then(function(result) {
         var result_obj = new Vertical_writeSyncData_result({success: result});
         output.writeMessageBegin("writeSyncData", Thrift.MessageType.REPLY, seqid);
@@ -2437,7 +2827,7 @@ VerticalProcessor.prototype.process_writeSyncData = function(seqid, input, outpu
         output.flush();
       });
   } else {
-    this._handler.writeSyncData(args.sync_write_data, function (err, result) {
+    this._handler.writeSyncData(args.sync_write_data, args.token, function (err, result) {
       var result_obj;
       if ((err === null || typeof err === 'undefined') || err instanceof ttypes.VerticalError) {
         result_obj = new Vertical_writeSyncData_result((err !== null || typeof err === 'undefined') ? err : {success: result});

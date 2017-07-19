@@ -1,5 +1,7 @@
 const path = require('path');
 const config = {
+    readKey:'',
+    writeKey:'',
     dataDir:path.join(__dirname,'data'),
     sysTable:'sys',
     serverPort:5234,
