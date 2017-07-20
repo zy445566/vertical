@@ -1,7 +1,8 @@
 const path = require('path');
 const config = {
-    readKey:'',
-    writeKey:'',
+    accessControl:false,// not open read write password
+    readKey:'',//read password
+    writeKey:'',//write password
     dataDir:path.join(__dirname,'data'),
     sysTable:'sys',
     serverPort:5234,

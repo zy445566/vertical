@@ -26,6 +26,7 @@ const Common = Vertical.Common;
 let timestamp = Common.genTimestamp();
 let table = 'tmp';
 let client = new Client('127.0.0.1', 5234);
+// or let client = new Client('127.0.0.1', 5234,password(read or write Key),is_write(true or false));
 
 //when node version<7.6 :
 client.connection().then((res)=>{
