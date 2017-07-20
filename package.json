@@ -1,6 +1,6 @@
 {
   "name": "vertical-db",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "levelDB distributed,BigTable model.",
   "main": "index.js",
   "scripts": {
